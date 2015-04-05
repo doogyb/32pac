@@ -4,6 +4,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Created by z00z on 04/04/15.
@@ -25,6 +27,7 @@ public class LyricsDB {
     }
 
     private void getSongs() {
+        if (!(new File("lyrics").exists())) new File("lyrics").mkdir();
         Elements top50Artists = getHtmlElement(url, "table td a[href]");
         for (Element artist : top50Artists) {
             String artistName = artist.text();
@@ -49,8 +52,8 @@ public class LyricsDB {
 
     public static void main(String[] args) {
         LyricsDB db = new LyricsDB(dbURL);
-        //db.getSongs();
-        db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
+        db.getSongs();
+        //db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
 
     }
 }
