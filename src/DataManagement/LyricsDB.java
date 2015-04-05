@@ -2,7 +2,8 @@ package DataManagement;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import java.io.IOException;
+
+import java.io.*;
 
 /**
  * Created by z00z on 04/04/15.
@@ -37,9 +38,19 @@ public class LyricsDB {
         }
     }
 
+    private void download(String url, String fileName) {
+        String text = getHtmlElement(url, "pre").text();
+        try {
+            FileWriter fw = new FileWriter("lyrics/" + fileName);
+            fw.write(text);
+            fw.close();
+        } catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
+    }
+
     public static void main(String[] args) {
         LyricsDB db = new LyricsDB(dbURL);
-        db.getSongs();
+        //db.getSongs();
+        db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
 
     }
 }
