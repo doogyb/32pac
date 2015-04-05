@@ -2,14 +2,12 @@ package DataManagement;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 /**
  * Created by z00z on 04/04/15.
  */
- 
+
 public class LyricsDB {
     private static final String dbURL = "http://ohhla.com/favorite.html";
     private String url;
@@ -28,9 +26,13 @@ public class LyricsDB {
     private void getSongs() {
         Elements top50Artists = getHtmlElement(url, "table td a[href]");
         for (Element artist : top50Artists) {
+            String artistName = artist.text();
+            System.out.println(artistName);
             Elements songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
             for (Element song : songs) {
-                System.out.println(song.attr("abs:href"));
+                String songURL = song.attr("abs:href");
+                String songName = song.text();
+                System.out.println("name " + songName + " artist = " + artistName + " URL = " + songURL);
             }
         }
     }
