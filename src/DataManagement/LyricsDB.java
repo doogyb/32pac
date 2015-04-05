@@ -26,12 +26,12 @@ public class LyricsDB {
         return element;
     }
 
-    private void getSongs() {
+    private void downloadSongs() {
         if (!(new File("lyrics").exists())) new File("lyrics").mkdir();
         Elements top50Artists = getHtmlElement(url, "table td a[href]");
         for (Element artist : top50Artists) {
             String artistName = artist.text();
-            System.out.println("[+] Downloading songs by " + artistName);
+            System.out.println("\n[+] Downloading songs by " + artistName);
             Elements songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
             for (Element song : songs) {
                 String songURL = song.attr("abs:href");
@@ -57,7 +57,7 @@ public class LyricsDB {
 
     public static void main(String[] args) {
         LyricsDB db = new LyricsDB(dbURL);
-        db.getSongs();
+        db.downloadSongs();
         //db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
 
     }
