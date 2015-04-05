@@ -55,10 +55,15 @@ public class LyricsDB {
         } catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
     }
 
+    private boolean haveLyrics() {
+        return ((new File("lyrics/").list().length) > 0);
+    }
+
     public static void main(String[] args) {
         LyricsDB db = new LyricsDB(dbURL);
-        db.downloadSongs();
+        //db.downloadSongs();
         //db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
+        System.out.println(db.haveLyrics());
 
     }
 }
