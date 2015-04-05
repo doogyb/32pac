@@ -35,7 +35,7 @@ public class LyricsDB {
             Elements songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
             for (Element song : songs) {
                 String songURL = song.attr("abs:href");
-                String songFileName = "lyrics/" + song.text();
+                String songFileName = "lyrics/" + song.text() + ".txt";
                 if (!(new File(songFileName).exists())) {
                     System.out.println("\t[+] Downloading + " + songURL);
                     download(songURL, songFileName);
@@ -46,13 +46,15 @@ public class LyricsDB {
         }
     }
 
-    private void download(String url, String fileName) {
+    private boolean download(String url, String fileName) {
         String text = getHtmlElement(url, "pre").text();
         try {
             FileWriter fw = new FileWriter(fileName);
             fw.write(text);
             fw.close();
+            return true;
         } catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
+        return false;
     }
 
     private boolean haveLyrics() {
