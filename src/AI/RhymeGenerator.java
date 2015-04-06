@@ -1,9 +1,10 @@
 package AI;
 import org.jsoup.Jsoup;
-import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -11,24 +12,29 @@ import java.util.List;
  */
 
 public class RhymeGenerator {
-    private RhymeGenerator() {}
 
-    private Elements getRhymes(String word) {
+    private HashMap<String, String[]> getRhymes(String word) {
         Elements element = null;
+        HashMap<String, String[]> rhymes = new HashMap<String, String[]>();
+
         try {
             element = Jsoup.connect("http://muse.dillfrog.com/sound/search?match_type=perfect_rhyme&group_by=syllable_count&word_type=&word=" + word + "&familiar_only=Y&defined_only=Y&pb=%21").get().select("div div");
             try {
-                System.out.println(element.get(1).select("a").text());
-                System.out.println(element.get(3).select("a").text());
-                System.out.println(element.get(5).select("a").text());
+                rhymes.put("1S", element.get(1).select("a").text().split(" "));
+                rhymes.put("2S", element.get(3).select("a").text().split(" "));
+                rhymes.put("3S", element.get(5).select("a").text().split(" "));
             } catch (IndexOutOfBoundsException e) {}
         }
         catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
-        return element;
+        return rhymes;
     }
-    
+
     public static void main(String[] args) {
-        RhymeGenerator r = new RhymeGenerator();
-        Elements e = r.getRhymes("zaid");
+        HashMap<String, String[]> rhymes = new RhymeGenerator().getRhymes("zaid");
+        for (String key : rhymes.keySet()) {
+            System.out.println("\n" + key + " rhymes: ");
+            for (String word : rhymes.get(key)) System.out.println("\t" + word);
+        }
+        //System.out.println(e.text());
     }
 }
