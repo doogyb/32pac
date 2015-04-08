@@ -13,7 +13,7 @@ import java.util.List;
 
 public class RhymeGenerator {
 
-    private HashMap<String, String[]> getRhymes(String word) {
+    protected HashMap<String, String[]> getRhymes(String word) {
         Elements element = null;
         HashMap<String, String[]> rhymes = new HashMap<String, String[]>();
 

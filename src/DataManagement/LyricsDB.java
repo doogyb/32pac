@@ -63,7 +63,7 @@ public class LyricsDB {
 
     public static void main(String[] args) {
         LyricsDB db = new LyricsDB(dbURL);
-        //db.downloadSongs();
+        db.downloadSongs();
         //db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
         System.out.println(db.haveLyrics());
 
