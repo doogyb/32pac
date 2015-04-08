@@ -4,8 +4,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * Created by z00z on 04/04/15.
@@ -35,9 +33,9 @@ public class LyricsDB {
             Elements songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
             for (Element song : songs) {
                 String songURL = song.attr("abs:href");
-                String songFileName = "lyrics/" + song.text() + ".txt";
+                String songFileName = "lyrics/" + song.text().replace("/","") + ".txt";
                 if (!(new File(songFileName).exists())) {
-                    System.out.println("\t[+] Downloading + " + songURL);
+                    System.out.println("\t[+] Downloading " + songURL);
                     download(songURL, songFileName);
                     try {Thread.sleep(500);}
                     catch (InterruptedException e) {System.err.println("Caught IOException: " + e.getMessage());}
@@ -65,7 +63,7 @@ public class LyricsDB {
         LyricsDB db = new LyricsDB(dbURL);
         db.downloadSongs();
         //db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
-        System.out.println(db.haveLyrics());
+        //System.out.println(db.haveLyrics());
 
     }
 }
