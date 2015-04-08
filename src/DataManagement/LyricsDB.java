@@ -20,7 +20,7 @@ public class LyricsDB {
     private Elements getHtmlElement(String url ,String element_name) {
         Elements element = null;
         try {element = Jsoup.connect(url).get().select(element_name);}
-        catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
+        catch (IOException e) {return null;}
         return element;
     }
 
@@ -45,14 +45,20 @@ public class LyricsDB {
     }
 
     private boolean download(String url, String fileName) {
-        String text = getHtmlElement(url, "pre").text();
-        try {
-            FileWriter fw = new FileWriter(fileName);
-            fw.write(text);
-            fw.close();
-            return true;
-        } catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
-        return false;
+        Elements element = getHtmlElement(url, "pre");
+
+        if (element == null) System.out.println("[-] Download failed (Incorrect URL ?)");
+        else {
+            String text = getHtmlElement(url, "pre").text();
+            try {
+                FileWriter fw = new FileWriter(fileName);
+                fw.write(text);
+                fw.close();
+                return true;
+            } catch (IOException e) {
+                System.err.println("Caught IOException: " + e.getMessage());
+            }
+        } return false;
     }
 
     private boolean haveLyrics() {
