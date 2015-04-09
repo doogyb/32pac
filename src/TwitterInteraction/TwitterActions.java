@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+
 import twitter4j.DirectMessage;
+import twitter4j.HashtagEntity;
 import twitter4j.ResponseList;
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -132,11 +134,25 @@ public class TwitterActions {
 		UserStreamListener userStreamListener = new UserStreamListener() {
 			@Override
 	        public void onDirectMessage(DirectMessage message) {
-	            System.out.println(message.getText());
+				int counter = 0;
+				HashtagEntity[] x = message.getHashtagEntities();
+				String username = message.getSender().getScreenName(), text = message.getText(), lastword = text.substring(text.lastIndexOf(" ") + 1);
+				String[] hashes = new String[46];	//max no of possible hashtags
+				for (HashtagEntity hash : x){
+					hashes[counter] = hash.getText();
+					counter++;
+				}
 	        }
 			@Override
 	        public void onStatus(Status status) {
-	            System.out.println(status.getText());
+				int counter = 0;
+				HashtagEntity[] x = status.getHashtagEntities();
+				String username = status.getUser().getScreenName(), text = status.getText(), lastword = text.substring(text.lastIndexOf(" ") + 1);
+				String[] hashes = new String[46];	//max no of possible hashtags
+				for (HashtagEntity hash : x){
+					hashes[counter] = hash.getText();
+					counter++;
+				}
 	        }
 	        @Override
 	        public void onException(Exception arg0) {}
