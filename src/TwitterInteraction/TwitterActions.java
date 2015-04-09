@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+
 import twitter4j.DirectMessage;
+import twitter4j.HashtagEntity;
 import twitter4j.ResponseList;
 import twitter4j.StallWarning;
 import twitter4j.Status;
@@ -39,7 +41,7 @@ public class TwitterActions {
 			twitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			AccessToken oauthAccessToken = new AccessToken(accessToken, accessTokenSecret);
 			twitter.setOAuthAccessToken(oauthAccessToken);	
-		    twitterStream.setOAuthAccessToken(oauthAccessToken);
+			twitterStream.setOAuthAccessToken(oauthAccessToken);
 		} catch (Exception e) {
 			System.out.println("Authorization failed!!!");
 		}
@@ -128,62 +130,76 @@ public class TwitterActions {
 		accessToken = secret[0];
 		accessTokenSecret = secret[1];
 	}
-	
+
 	public void Listener(){
 		UserStreamListener userStreamListener = new UserStreamListener() {
 			@Override
-	        public void onDirectMessage(DirectMessage message) {
-	            System.out.println(message.getText());
-	        }
+			public void onDirectMessage(DirectMessage message) {
+				int counter = 0;
+				HashtagEntity[] x = message.getHashtagEntities();
+				String username = message.getSender().getScreenName(), text = message.getText(), lastword = text.substring(text.lastIndexOf(" ") + 1);
+				String[] hashes = new String[46];	//max no of possible hashtags
+				for (HashtagEntity hash : x){
+					hashes[counter] = hash.getText();
+					counter++;
+				}
+			}
 			@Override
-	        public void onStatus(Status status) {
-	            System.out.println(status.getText());
-	        }
-	        @Override
-	        public void onException(Exception arg0) {}
-	        @Override
-	        public void onTrackLimitationNotice(int arg0) {}
-	        @Override
-	        public void onScrubGeo(long arg0, long arg1) {}
-	        @Override
-	        public void onDeletionNotice(StatusDeletionNotice arg0) {}
-	        @Override
-	        public void onUserProfileUpdate(User arg0) {}
-	        @Override
-	        public void onUserListUpdate(User arg0, UserList arg1) {}
-	        @Override
-	        public void onUserListUnsubscription(User arg0, User arg1, UserList arg2) {}
-	        @Override
-	        public void onUserListSubscription(User arg0, User arg1, UserList arg2) {}
-	        @Override
-	        public void onUserListMemberDeletion(User arg0, User arg1, UserList arg2) {}
-	        @Override
-	        public void onUserListMemberAddition(User arg0, User arg1, UserList arg2) {}
-	        @Override
-	        public void onUserListDeletion(User arg0, UserList arg1) {}
-	        @Override
-	        public void onUserListCreation(User arg0, UserList arg1) {}
-	        @Override
-	        public void onUnfavorite(User arg0, User arg1, Status arg2) {}
-	        @Override
-	        public void onUnblock(User arg0, User arg1) {}
-	        @Override
-	        public void onFriendList(long[] arg0) {}
-	        @Override
-	        public void onFollow(User arg0, User arg1) {}
-	        @Override
-	        public void onFavorite(User arg0, User arg1, Status arg2) {}
-	        @Override
-	        public void onDeletionNotice(long arg0, long arg1) {}
-	        @Override
-	        public void onBlock(User arg0, User arg1) {}
+			public void onStatus(Status status) {
+				int counter = 0;
+				HashtagEntity[] x = status.getHashtagEntities();
+				String username = status.getUser().getScreenName(), text = status.getText(), lastword = text.substring(text.lastIndexOf(" ") + 1);
+				String[] hashes = new String[46];	//max no of possible hashtags
+				for (HashtagEntity hash : x){
+					hashes[counter] = hash.getText();
+					counter++;
+				}
+			}
+			@Override
+			public void onException(Exception arg0) {}
+			@Override
+			public void onTrackLimitationNotice(int arg0) {}
+			@Override
+			public void onScrubGeo(long arg0, long arg1) {}
+			@Override
+			public void onDeletionNotice(StatusDeletionNotice arg0) {}
+			@Override
+			public void onUserProfileUpdate(User arg0) {}
+			@Override
+			public void onUserListUpdate(User arg0, UserList arg1) {}
+			@Override
+			public void onUserListUnsubscription(User arg0, User arg1, UserList arg2) {}
+			@Override
+			public void onUserListSubscription(User arg0, User arg1, UserList arg2) {}
+			@Override
+			public void onUserListMemberDeletion(User arg0, User arg1, UserList arg2) {}
+			@Override
+			public void onUserListMemberAddition(User arg0, User arg1, UserList arg2) {}
+			@Override
+			public void onUserListDeletion(User arg0, UserList arg1) {}
+			@Override
+			public void onUserListCreation(User arg0, UserList arg1) {}
+			@Override
+			public void onUnfavorite(User arg0, User arg1, Status arg2) {}
+			@Override
+			public void onUnblock(User arg0, User arg1) {}
+			@Override
+			public void onFriendList(long[] arg0) {}
+			@Override
+			public void onFollow(User arg0, User arg1) {}
+			@Override
+			public void onFavorite(User arg0, User arg1, Status arg2) {}
+			@Override
+			public void onDeletionNotice(long arg0, long arg1) {}
+			@Override
+			public void onBlock(User arg0, User arg1) {}
 			@Override
 			public void onStallWarning(StallWarning arg0) {}
 			@Override
 			public void onUnfollow(User arg0, User arg1) {}
-	    };
+		};
 		twitterStream.addListener(userStreamListener);
-        twitterStream.user();
+		twitterStream.user();
 	}
 
 	public static void main(String[] args) throws Exception {
