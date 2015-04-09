@@ -8,11 +8,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import twitter4j.DirectMessage;
 import twitter4j.ResponseList;
+import twitter4j.StallWarning;
 import twitter4j.Status;
+import twitter4j.StatusDeletionNotice;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.TwitterStream;
+import twitter4j.TwitterStreamFactory;
+import twitter4j.User;
+import twitter4j.UserList;
+import twitter4j.UserStreamListener;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
@@ -23,12 +31,15 @@ public class TwitterActions {
 
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
 	private Twitter twitter = new TwitterFactory().getInstance();
+	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 
 	public void authorization() {
 		try {        
 			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
+			twitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			AccessToken oauthAccessToken = new AccessToken(accessToken, accessTokenSecret);
-			twitter.setOAuthAccessToken(oauthAccessToken);
+			twitter.setOAuthAccessToken(oauthAccessToken);	
+		    twitterStream.setOAuthAccessToken(oauthAccessToken);
 		} catch (Exception e) {
 			System.out.println("Authorization failed!!!");
 		}
@@ -52,6 +63,7 @@ public class TwitterActions {
 	}
 
 	public void getTokens() throws TwitterException, IOException {	//keys must be set before calling this
+		String filename = "tokens.txt";
 		twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 		RequestToken requestToken = twitter.getOAuthRequestToken();
 		System.out.println("Authorization URL: \n" + requestToken.getAuthorizationURL());
@@ -70,7 +82,6 @@ public class TwitterActions {
 		br.close();
 		System.out.println("Access Token: " + accessToken.getToken());
 		System.out.println("Access Token Secret: " + accessToken.getTokenSecret());
-		String filename = "tokens.txt";
 		try {
 			Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8"));
 			writer.write(accessToken.getToken());
@@ -117,11 +128,70 @@ public class TwitterActions {
 		accessToken = secret[0];
 		accessTokenSecret = secret[1];
 	}
+	
+	public void Listener(){
+		UserStreamListener userStreamListener = new UserStreamListener() {
+			@Override
+	        public void onDirectMessage(DirectMessage message) {
+	            System.out.println(message.getText());
+	        }
+			@Override
+	        public void onStatus(Status status) {
+	            System.out.println(status.getText());
+	        }
+	        @Override
+	        public void onException(Exception arg0) {}
+	        @Override
+	        public void onTrackLimitationNotice(int arg0) {}
+	        @Override
+	        public void onScrubGeo(long arg0, long arg1) {}
+	        @Override
+	        public void onDeletionNotice(StatusDeletionNotice arg0) {}
+	        @Override
+	        public void onUserProfileUpdate(User arg0) {}
+	        @Override
+	        public void onUserListUpdate(User arg0, UserList arg1) {}
+	        @Override
+	        public void onUserListUnsubscription(User arg0, User arg1, UserList arg2) {}
+	        @Override
+	        public void onUserListSubscription(User arg0, User arg1, UserList arg2) {}
+	        @Override
+	        public void onUserListMemberDeletion(User arg0, User arg1, UserList arg2) {}
+	        @Override
+	        public void onUserListMemberAddition(User arg0, User arg1, UserList arg2) {}
+	        @Override
+	        public void onUserListDeletion(User arg0, UserList arg1) {}
+	        @Override
+	        public void onUserListCreation(User arg0, UserList arg1) {}
+	        @Override
+	        public void onUnfavorite(User arg0, User arg1, Status arg2) {}
+	        @Override
+	        public void onUnblock(User arg0, User arg1) {}
+	        @Override
+	        public void onFriendList(long[] arg0) {}
+	        @Override
+	        public void onFollow(User arg0, User arg1) {}
+	        @Override
+	        public void onFavorite(User arg0, User arg1, Status arg2) {}
+	        @Override
+	        public void onDeletionNotice(long arg0, long arg1) {}
+	        @Override
+	        public void onBlock(User arg0, User arg1) {}
+			@Override
+			public void onStallWarning(StallWarning arg0) {}
+			@Override
+			public void onUnfollow(User arg0, User arg1) {}
+	    };
+		twitterStream.addListener(userStreamListener);
+        twitterStream.user();
+	}
 
 	public static void main(String[] args) throws Exception {
 		TwitterActions client = new TwitterActions();
 		client.readKeys();
-		client.getTokens();
+		//client.getTokens();
+		client.readTokens();
+		client.authorization();
+		client.Listener();
 	}
-
 }
