@@ -22,7 +22,7 @@ public class lyricChooser {
 
     private Tweet tweet;
     protected ArrayList<RhymeLine> rhymeLines = new ArrayList<RhymeLine>();
-    protected ArrayList<String> rhymeList = new ArrayList<String>();
+    protected HashMap<String,ArrayList<String>> rhymeList = new HashMap<String, ArrayList<String>>();
 
     public lyricChooser(Tweet tweet) {
         this.tweet = tweet;
@@ -71,9 +71,12 @@ public class lyricChooser {
                     words = line2.split(" ");
                     lastWord2 = words[words.length-1].toLowerCase();
 
-
-                    if (rhymeList.contains(lastWord2))
-                        rhymeLines.add(new RhymeLine(line1, line2, artist, album, songName));
+                    for (String key : rhymeList.keySet()) {
+                        if ( rhymeList.get(key).contains(lastWord1) && rhymeList.get(key).contains(lastWord2) ) {
+                            rhymeLines.add( new RhymeLine(line1,line2,artist,album,songName,key));
+                            break;
+                        }
+                    }
 
                 } catch (IOException e) { e.printStackTrace(); }
             }
