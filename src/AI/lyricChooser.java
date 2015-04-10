@@ -42,11 +42,14 @@ public class lyricChooser {
 
             if (song.length()<500) continue; // ignore empty or nearly empty files
 
+            //System.out.println(song.getAbsolutePath());
+
             try {
-                artist = br.readLine().split(":")[1];
-                album = br. readLine().split(":")[1];
-                songName = br.readLine().split(":")[1];
-                br.readLine(); // skipping last line (Typed by)
+//                String line = br.readLine();
+//                artist = br.readLine().split(":\\s*")[1];
+//                album = br. readLine().split(":\\s*")[1];
+//                songName = br.readLine().split(":\\s*")[1];
+//                br.readLine(); // skipping last line (Typed by)
                 line1=br.readLine();
                 line2=br.readLine();
             } catch (IOException e) { e.printStackTrace(); }
@@ -69,7 +72,7 @@ public class lyricChooser {
                     lastWord2 = words[words.length-1].toLowerCase();
 
 
-                    if (rhymeList.contains(lastWord1) && rhymeList.contains(lastWord2))
+                    if (rhymeList.contains(lastWord2))
                         rhymeLines.add(new RhymeLine(line1, line2, artist, album, songName));
 
                 } catch (IOException e) { e.printStackTrace(); }
@@ -78,7 +81,7 @@ public class lyricChooser {
         }
     }
     public static void main (String[] args) {
-        Tweet tw = new Tweet("zaid");
+        Tweet tw = new Tweet("sam");
         lyricChooser lc = new lyricChooser(tw);
         lc.chooseLyrics();
         for (RhymeLine line : lc.rhymeLines)
