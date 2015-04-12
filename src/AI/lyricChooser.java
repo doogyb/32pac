@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by samuel on 08/04/15.
@@ -27,6 +28,24 @@ public class lyricChooser {
     public lyricChooser(Tweet tweet) {
         this.tweet = tweet;
         this.rhymeList = new RhymeGenerator().getRhymes(tweet.getRhymeWord());
+    }
+
+    private boolean isVowel(char c) {
+        return (c == 'e' || c == 'a' || c == 'i' || c == 'o' || c == 'u' || c == 'y');
+    }
+
+    private int numberOfSyllables() {
+        int syllablesCount = 0;
+        char[] word = tweet.getRhymeWord().toCharArray();
+
+        for (int i = 0; i < word.length-1; i++) {
+            if (isVowel(word[i])) {
+                syllablesCount++;
+                while (isVowel(word[i])) i++;
+            }
+        }
+
+        return syllablesCount;
     }
 
     public void chooseLyrics() {
@@ -84,11 +103,12 @@ public class lyricChooser {
         }
     }
     public static void main (String[] args) {
-        Tweet tw = new Tweet("sam");
+        Tweet tw = new Tweet("zaid");
         lyricChooser lc = new lyricChooser(tw);
-        lc.chooseLyrics();
-        for (RhymeLine line : lc.rhymeLines)
-            System.out.println(line.toString());
+        System.out.println(lc.numberOfSyllables());
+//        lc.chooseLyrics();
+//        for (RhymeLine line : lc.rhymeLines)
+//            System.out.println(line.toString());
     }
 
 }
