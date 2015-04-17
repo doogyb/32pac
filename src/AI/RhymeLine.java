@@ -4,8 +4,9 @@ package AI;
  * Created by doogy on 09/03/15.
  */
 public class RhymeLine {
-    String line1, line2, artist, album, songName, syllables;
-    public RhymeLine(String l1, String l2, String ar, String al, String song, String syl) {
+    protected String line1, line2, artist, album, songName;
+    protected int syllables, score=0;
+    public RhymeLine(String l1, String l2, String ar, String al, String song, Integer syl) {
         line1 = l1;
         line2 = l2;
         artist = ar;

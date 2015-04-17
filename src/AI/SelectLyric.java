@@ -19,7 +19,15 @@ public class SelectLyric {
         int maxScore = 0;
         RhymeLine bestLine=null;
         for (RhymeLine line : rhymeLines) {
-            //if (tweet.getRhymeWord().
+            if (NaturalLanguage.numberOfSyllables(tweet.getRhymeWord())==line.syllables) {
+                line.score+=10;
+            }
+
+            if (line.score>maxScore) {
+                bestLine=line;
+                maxScore=line.score;
+            }
+
         }
         return bestLine;
     }

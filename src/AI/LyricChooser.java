@@ -19,11 +19,11 @@ public class LyricChooser {
 
     private Tweet tweet;
     protected ArrayList<RhymeLine> rhymeLines = new ArrayList<RhymeLine>();
-    protected HashMap<String,ArrayList<String>> rhymeList = new HashMap<String, ArrayList<String>>();
+    protected HashMap<Integer,ArrayList<String>> rhymeList = new HashMap<Integer, ArrayList<String>>();
 
     public LyricChooser(Tweet tweet) {
         this.tweet = tweet;
-        this.rhymeList = new RhymeGenerator().getRhymes(tweet.getRhymeWord());
+        this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
     }
 
 
@@ -72,7 +72,7 @@ public class LyricChooser {
                     lastWord1=NaturalLanguage.getLastWord(line1);
                     lastWord2=NaturalLanguage.getLastWord(line2);
 
-                    for (String key : rhymeList.keySet()) {
+                    for (Integer key : rhymeList.keySet()) {
                         if ( rhymeList.get(key).contains(lastWord1) && rhymeList.get(key).contains(lastWord2) ) {
                             rhymeLines.add( new RhymeLine(line1,line2,artist,album,songName,key));
                             break;

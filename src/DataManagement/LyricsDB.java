@@ -37,8 +37,8 @@ public class LyricsDB {
                 if (!(new File(songFileName).exists())) {
                     System.out.println("\t[+] Downloading " + songURL);
                     download(songURL, songFileName);
-                    try {Thread.sleep(500);}
-                    catch (InterruptedException e) {System.err.println("Caught IOException: " + e.getMessage());}
+                    //try {Thread.sleep(500);}
+                    //catch (InterruptedException e) {System.err.println("Caught IOException: " + e.getMessage());}
                 }
             }
         }
@@ -68,8 +68,8 @@ public class LyricsDB {
     public static void main(String[] args) {
         LyricsDB db = new LyricsDB(dbURL);
         db.downloadSongs();
-        //db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
-        //System.out.println(db.haveLyrics());
+        db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
+        System.out.println(db.haveLyrics());
 
     }
 }
