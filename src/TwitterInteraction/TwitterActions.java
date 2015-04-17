@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import twitter4j.DirectMessage;
 import twitter4j.HashtagEntity;
@@ -35,6 +34,7 @@ public class TwitterActions {
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
 	private Twitter twitter = new TwitterFactory().getInstance();
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
+	Tweet currentTweet;
 
 	public void authorization() {
 		try {        
@@ -137,22 +137,20 @@ public class TwitterActions {
 			@Override
 			public void onDirectMessage(DirectMessage message) {
 				HashtagEntity[] hashtagList = message.getHashtagEntities();
-				String username = message.getSender().getScreenName(), text = message.getText(), lastword = text.substring(text.lastIndexOf(" ") + 1);
 				Set<String> hashtags = new HashSet<String>();
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				Set<String> out = processor(hashtags);
+				currentTweet = new Tweet(message.getText(), hashtags, message.getSender().getScreenName());
 			}
 			@Override
 			public void onStatus(Status status) {
 				HashtagEntity[] hashtagList = status.getHashtagEntities();
-				String username = status.getUser().getScreenName(), text = status.getText(), lastword = text.substring(text.lastIndexOf(" ") + 1);
 				Set<String> hashtags = new HashSet<String>();
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				Set<String> out = processor(hashtags);
+				currentTweet  = new Tweet(status.getText(), hashtags, status.getUser().getScreenName());
 			}
 			@Override
 			public void onException(Exception arg0) {}
@@ -201,52 +199,6 @@ public class TwitterActions {
 		twitterStream.user();
 	}
 
-	public Set<String> processor(Set<String> hashtags){
-		String filename = "unix.dict";
-		Set<String> dict = new HashSet<String>(), out = new HashSet<String>();
-		try{
-			FileReader inputFile = new FileReader(filename);
-			BufferedReader bufferReader = new BufferedReader(inputFile);
-			for(String line = bufferReader.readLine(); line != null; line = bufferReader.readLine()) { 
-				if (line.length() > 2) dict.add(line);
-			}
-			bufferReader.close();
-			inputFile.close();
-		}catch(Exception e){
-			System.out.println("Error reading file: " + e.getMessage());                      
-		}
-		Iterator<String> itr = hashtags.iterator();
-		while (itr.hasNext()){
-			splitString(itr.next(), dict, out);
-		}
-		return out;
-	}
-
-	void splitString(String input, Set<String> dict, Set<String> out) {
-		int pos = 0, matched = 0;
-		String match = "";
-		if (input.length() < 3) return;
-		if (dict.contains(input)) return;
-		while (input.length() != 0){
-			for (int i = 1; i <= input.length(); i++) {
-				String split = input.substring(0, i);
-				if (dict.contains(split)) {
-					match = split;
-					pos = i;
-					matched = 1;
-				}
-			}
-			if (matched == 1) {
-				input = input.substring(pos);
-				matched = 0;
-				System.out.println(match); //testing
-				out.add(match);
-			}
-			else {
-				input = input.substring(1);
-			}
-		}
-	}
 
 	public static void main(String[] args) throws Exception {
 		TwitterActions client = new TwitterActions();
@@ -256,8 +208,6 @@ public class TwitterActions {
 		//client.authorization();
 		//client.listener();
 		//client.processor();
-		Set<String> x = new HashSet<String>();	//testing
-		x.add("adfshovelheadkkbombxtanklkmklnn.");
-		client.processor(x);
+		
 	}
 }

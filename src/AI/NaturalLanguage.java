@@ -3,16 +3,34 @@ package AI;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Created by samuel on 16/04/15.
  */
 public class NaturalLanguage {
 
+	static Set<String> dict = genDict();
+			
+	public static HashSet<String> genDict() {
+		HashSet<String> dict = new HashSet<String>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader("unix.dict"));
+			String line;
+			while ((line=br.readLine())!=null)
+				if (line.length() > 3) dict.add(line);
+		} catch (IOException e) { e.printStackTrace(); }
+	}
+	
+	
     public static int numberOfSyllables(String input) {
         int syllablesCount = 0;
         char[] word = input.toCharArray();
@@ -55,4 +73,32 @@ public class NaturalLanguage {
         catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
         return rhymes;
     }
+    
+    public static ArrayList<String> splitString(String input) {
+		ArrayList<String> out = new ArrayList<String>();
+    	int pos = 0, matched = 0;
+		String match = "";
+		if (input.length() < 3) return null;
+		if (dict.contains(input)) return null;
+		while (input.length() != 0){
+			for (int i = 1; i <= input.length(); i++) {
+				String split = input.substring(0, i);
+				if (dict.contains(split)) {
+					match = split;
+					pos = i;
+					matched = 1;
+				}
+			}
+			if (matched == 1) {
+				input = input.substring(pos);
+				matched = 0;
+				System.out.println(match); //testing
+				out.add(match);
+			}
+			else {
+				input = input.substring(1);
+			}
+		}
+		return out;
+	}
 }
