@@ -1,5 +1,6 @@
 package AI;
 
+import DataManagement.LyricsDB;
 import TwitterInteraction.Tweet;
 
 import java.io.BufferedReader;
@@ -18,17 +19,13 @@ public class LyricChooser {
     public static final int MIN_LINE_LENGTH = 5;
 
     private Tweet tweet;
-    protected ArrayList<RhymeLine> rhymeLines = new ArrayList<RhymeLine>();
+    public ArrayList<RhymeLine> rhymeLines = new ArrayList<RhymeLine>();
     protected HashMap<Integer,ArrayList<String>> rhymeList = new HashMap<Integer, ArrayList<String>>();
 
     public LyricChooser(Tweet tweet) {
         this.tweet = tweet;
         this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
     }
-
-
-
-
 
     public void chooseLyrics() {
         File[] songs = new File("lyrics").listFiles();
@@ -68,13 +65,12 @@ public class LyricChooser {
                             NaturalLanguage.getLastWord(line2)==null) continue;
                     if ( (line1+line2).length() > 140 ) continue; // rhyme is too long to be tweeted
 
-
                     lastWord1=NaturalLanguage.getLastWord(line1);
                     lastWord2=NaturalLanguage.getLastWord(line2);
 
                     for (Integer key : rhymeList.keySet()) {
                         if ( rhymeList.get(key).contains(lastWord1) && rhymeList.get(key).contains(lastWord2) ) {
-                            rhymeLines.add( new RhymeLine(line1,line2,artist,album,songName,key));
+                            rhymeLines.add(new RhymeLine(line1, line2, artist, album, songName, key));
                             break;
                         }
                     }
@@ -84,12 +80,31 @@ public class LyricChooser {
 
         }
     }
-    public static void main (String[] args) {
-        Tweet tw = new Tweet("zaid");
-        LyricChooser lc = new LyricChooser(tw);
-//        lc.chooseLyrics();
-//        for (RhymeLine line : lc.rhymeLines)
-//            System.out.println(line.toString());
-    }
 
+    public RhymeLine selectBest() {
+        int maxScore = 0;
+        RhymeLine bestLine=null;
+        for (RhymeLine line : rhymeLines) {
+            String fullRhyme = line.line1+line.line2;
+            System.out.println(fullRhyme);
+            //check if last word and rhyme word have the same number of sels
+            if (NaturalLanguage.numberOfSyllables(tweet.getRhymeWord())==line.syllables) line.score+=10;
+
+            //check if last word is contained in line
+            if (line.line1.contains(tweet.getRhymeWord())) line.score += 10;
+            if (line.line2.contains(tweet.getRhymeWord())) line.score += 10;
+
+            //checks if it contains you
+            if (line.line2.contains("you") || line.line2.contains("your") || line.line2.contains("you're")) line.score += 10;
+
+
+
+            if (line.score>maxScore) {
+                bestLine=line;
+                maxScore=line.score;
+            }
+
+        }
+        return bestLine;
+    }
 }
