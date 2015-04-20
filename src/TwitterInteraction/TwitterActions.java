@@ -9,12 +9,17 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import twitter4j.DirectMessage;
+import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
 import twitter4j.ResponseList;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
+import twitter4j.StatusListener;
+import twitter4j.Trends;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -32,9 +37,9 @@ public class TwitterActions {
 	 */
 
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
-	private Twitter twitter = new TwitterFactory().getInstance();
+	private static Twitter twitter = new TwitterFactory().getInstance();
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
-	Tweet currentTweet;
+	Set<Tweet> currentTweets = new HashSet<Tweet>();
 
 	public void authorization() {
 		try {        
@@ -141,7 +146,7 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				currentTweet = new Tweet(message.getText(), hashtags, message.getSender().getScreenName());
+				currentTweets.add(new Tweet(message.getText(), hashtags, message.getSender().getScreenName()));
 			}
 			@Override
 			public void onStatus(Status status) {
@@ -150,7 +155,7 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				currentTweet  = new Tweet(status.getText(), hashtags, status.getUser().getScreenName());
+				currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
 			}
 			@Override
 			public void onException(Exception arg0) {}
@@ -199,15 +204,79 @@ public class TwitterActions {
 		twitterStream.user();
 	}
 
+	public void getTrendtweets(){
+		StatusListener listener = new StatusListener() {
+			int counter = 0;
+			@Override
+			public void onException(Exception arg0) {}
+			@Override
+			public void onDeletionNotice(StatusDeletionNotice arg0) {}
+			@Override
+			public void onScrubGeo(long arg0, long arg1) {}
+			@Override
+			public void onStatus(Status status) {
+				HashtagEntity[] hashtagList = status.getHashtagEntities();
+				Set<String> hashtags = new HashSet<String>();
+				for (HashtagEntity hash : hashtagList){
+					hashtags.add(hash.getText());
+				}
+				if (counter < 20){
+					currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
+					//System.out.println(status.getText());
+					counter++;
+				}
+				else sleep();
+			}
+			@Override
+			public void onTrackLimitationNotice(int arg0) {}
+			@Override
+			public void onStallWarning(StallWarning arg0) {}
+			public void sleep(){
+				System.out.println("Sleeping...");
+				try {
+					TimeUnit.MINUTES.sleep(2);          
+				} catch(InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
+				counter = 0;
+			}
+		};
+		FilterQuery fq = new FilterQuery();
+		String keywords[] = getTrends();
+		fq.track(keywords);
+		twitterStream.addListener(listener);
+		twitterStream.filter(fq);
+	}
+
+	public String[] getTrends(){
+		Trends trends = null;
+		String[] out = new String[3];
+		try {
+			trends = twitter.getPlaceTrends(23424977); //us woeid
+		} catch (TwitterException e) {
+			e.printStackTrace();
+		}
+		for (int i = 0; i < 3; i++) {
+			out[i] = (trends.getTrends()[i].getName()).replace("#", "");
+		}
+		return out;
+	}
+
 
 	public static void main(String[] args) throws Exception {
 		TwitterActions client = new TwitterActions();
-		//client.readKeys();
+		client.readKeys();
 		//client.getTokens();
-		//client.readTokens();
-		//client.authorization();
-		//client.listener();
-		//client.processor();
-		
+		client.readTokens();
+		client.authorization();
+		client.listener();
+		client.getTrendtweets();
+		//		ResponseList<twitter4j.Location> locations;
+		//		locations = twitter.getAvailableTrends();
+		//		System.out.println("Showing available trends");
+		//		for (twitter4j.Location location : locations) {
+		//		    System.out.println(location.getName() + " (woeid:" + location.getWoeid() + ")");
+		//		}
+
 	}
 }
