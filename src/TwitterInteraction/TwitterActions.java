@@ -248,33 +248,33 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				if (counter < 20){
+				if (counter < 5){
 					currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
-					//System.out.println(status.getText());
+					System.out.println(status.getText());
 					counter++;
 				}
-				else sleep();
-
+				else handleTweets();
+			}
+			public void handleTweets(){
+				return;
 			}
 			@Override
 			public void onTrackLimitationNotice(int arg0) {}
 			@Override
 			public void onStallWarning(StallWarning arg0) {}
-			public void sleep(){
-				System.out.println("Sleeping...");
-				try {
-					TimeUnit.MINUTES.sleep(2);          
-				} catch(InterruptedException ex) {
-					Thread.currentThread().interrupt();
-				}
-				counter = 0;
-			}
 		};
-		FilterQuery fq = new FilterQuery();
-		String keywords[] = getTrends();
-		fq.track(keywords);
-		twitterStream.addListener(listener);
-		twitterStream.filter(fq);
+		while (true){
+			FilterQuery fq = new FilterQuery();
+			fq.track(getTrends());
+			twitterStream.addListener(listener);
+			twitterStream.filter(fq);
+			try {
+				TimeUnit.SECONDS.sleep(180);          
+			} catch(InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+			twitterStream.removeListener(listener);
+		}
 	}
 
 	public String[] getTrends(){
@@ -286,7 +286,8 @@ public class TwitterActions {
 			e.printStackTrace();
 		}
 		for (int i = 0; i < 3; i++) {
-			out[i] = (trends.getTrends()[i].getName()).replace("#", "");
+			out[i] = trends.getTrends()[i].getName();
+			System.out.println(out[i]);
 		}
 		return out;
 	}
@@ -298,14 +299,7 @@ public class TwitterActions {
 		//client.getTokens();
 		client.readTokens();
 		client.authorization();
-		client.listener();
+		//client.listener();
 		client.getTrendtweets();
-		//		ResponseList<twitter4j.Location> locations;
-		//		locations = twitter.getAvailableTrends();
-		//		System.out.println("Showing available trends");
-		//		for (twitter4j.Location location : locations) {
-		//		    System.out.println(location.getName() + " (woeid:" + location.getWoeid() + ")");
-		//		}
-
 	}
 }
