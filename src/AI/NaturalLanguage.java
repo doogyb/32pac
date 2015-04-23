@@ -30,7 +30,23 @@ public class NaturalLanguage {
 		} catch (IOException e) { e.printStackTrace(); }
         return dict;
 	}
-	
+
+    public static String removeLastWords(String input) {
+        String lastWord = NaturalLanguage.getLastWord(input);
+
+        while ( lastWord.charAt(0) == '@') {
+            input = input.substring(0, input.length() - lastWord.length());
+            lastWord = NaturalLanguage.getLastWord(input);
+        }
+        String last="";
+        int i;
+        for (i = lastWord.toCharArray().length - 1; i >= 0; i--) {
+            if (Character.isLetterOrDigit(lastWord.charAt(i)))
+                break;
+        }
+        System.out.println("lastWord: " + lastWord);
+        return input.substring(0,input.length()-lastWord.length()-1) + lastWord.substring(0,i);
+    }
 	
     public static int numberOfSyllables(String input) {
         int syllablesCount = 0;

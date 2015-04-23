@@ -14,8 +14,10 @@ import java.util.Set;
 public class MainPac {
 
     public static void main (String[] args) {
-        TwitterActions TA = new TwitterActions();
-        TA.authorization();
-        TA.listener();
+//        TwitterActions TA = new TwitterActions();
+//        TA.authorization();
+//        TA.listener();
+
+        System.out.println(NaturalLanguage.removeLastWords("hello my good frined th!@ere.?! @zaid"));
     }
 }

@@ -10,6 +10,7 @@ public class RhymeLine {
         line1 = l1;
         line2 = l2;
         syllables=syl;
+
     }
     public String toString() {
         return line1 + "\n" + line2;
