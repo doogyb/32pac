@@ -4,17 +4,14 @@ package AI;
  * Created by doogy on 09/03/15.
  */
 public class RhymeLine {
-    protected String line1, line2, artist, album, songName;
+    protected String line1, line2;
     protected int syllables, score=0;
-    public RhymeLine(String l1, String l2, String ar, String al, String song, Integer syl) {
+    public RhymeLine(String l1, String l2, Integer syl) {
         line1 = l1;
         line2 = l2;
-        artist = ar;
-        album = al;
-        songName = song;
         syllables=syl;
     }
     public String toString() {
-        return "Artist: " + artist +"\nAlbum" + album + "Song: " + songName +"\n\n Lines: \n" + line1 + "\n" + line2;
+        return line1 + "\n" + line2;
     }
 }

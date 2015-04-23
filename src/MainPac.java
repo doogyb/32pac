@@ -1,6 +1,10 @@
+import AI.NaturalLanguage;
 import AI.RhymeLine;
 import AI.LyricChooser;
 import TwitterInteraction.Tweet;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by doogy on 17/04/15.
@@ -9,11 +13,12 @@ import TwitterInteraction.Tweet;
 public class MainPac {
 
     public static void main (String[] args) {
-        //I shat myself
-        Tweet tw = new Tweet("myself");
+        Tweet tw = new Tweet("my main hammer", new HashSet(), "fergyPoo");
         LyricChooser lc = new LyricChooser(tw);
         lc.chooseLyrics();
-        System.out.println(lc.selectBest());
+        String tweetMessage = lc.selectBest() + "\n@" + tw.getUserName();
+        System.out.println(tweetMessage);
+
         //for (RhymeLine line : lc.rhymeLines) System.out.println(line.toString());
     }
 }

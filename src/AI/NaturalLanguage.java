@@ -28,6 +28,7 @@ public class NaturalLanguage {
 			while ((line=br.readLine())!=null)
 				if (line.length() > 3) dict.add(line);
 		} catch (IOException e) { e.printStackTrace(); }
+        return dict;
 	}
 	
 	
