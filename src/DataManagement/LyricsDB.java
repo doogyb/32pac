@@ -31,6 +31,12 @@ public class LyricsDB {
             String artistName = artist.text();
             System.out.println("\n[+] Downloading songs by " + artistName);
             Elements songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
+            while (songs == null) {
+                songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
+                System.out.println("Hanging on song name");
+                try {Thread.sleep(500);}
+                catch (InterruptedException e) {System.err.println("Caught IOException: " + e.getMessage());}
+            }
             for (Element song : songs) {
                 String songURL = song.attr("abs:href");
                 String songFileName = "lyrics/" + song.text().replace("/","") + ".txt";

@@ -21,4 +21,8 @@ public class Tweet {
     }
     public String getRhymeWord() { return rhymeWord; }
     public String getUserName() { return userName; }
+
+    public String toString() {
+        return text + "\n\nRhymeword: " + rhymeWord + "\n\n userName: " + userName;
+    }
 }
