@@ -9,10 +9,18 @@ public class RhymeLine {
     public RhymeLine(String l1, String l2, Integer syl) {
         line1 = l1;
         line2 = l2;
-        syllables=syl;
-
+        syllables = syl;
     }
+    
     public String toString() {
         return line1 + "\n" + line2;
+    }
+    
+    public int get_score(){
+    	return score;
+    }
+    
+    public void set_score(int input){
+    	score = input;
     }
 }

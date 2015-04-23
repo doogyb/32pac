@@ -93,7 +93,9 @@ public class LyricChooser {
             //checks if it contains you
             if (line.line2.contains("you") || line.line2.contains("your") || line.line2.contains("you're")) line.score += 10;
 
-
+            //checks if it contains a question
+            if (line.line1.contains("?")) line.score += 10;
+            if (line.line2.contains("?")) line.score += 10;
 
             if (line.score>maxScore) {
                 bestLine=line;
@@ -101,6 +103,7 @@ public class LyricChooser {
             }
 
         }
+        bestLine.set_score(maxScore);
         return bestLine;
     }
 }
