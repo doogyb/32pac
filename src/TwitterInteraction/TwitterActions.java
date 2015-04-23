@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import AI.LyricChooser;
+import AI.RhymeLine;
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
@@ -41,8 +43,16 @@ public class TwitterActions {
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 	Set<Tweet> currentTweets = new HashSet<Tweet>();
 
+	public static RhymeLine getTweetText(Tweet tw) {
+		LyricChooser lc = new LyricChooser(tw);
+		lc.chooseLyrics();
+		return lc.selectBest();
+	}
+
 	public void authorization() {
-		try {        
+		readKeys();
+		readTokens();
+		try {
 			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			twitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			AccessToken oauthAccessToken = new AccessToken(accessToken, accessTokenSecret);
@@ -143,10 +153,11 @@ public class TwitterActions {
 			public void onDirectMessage(DirectMessage message) {
 				HashtagEntity[] hashtagList = message.getHashtagEntities();
 				Set<String> hashtags = new HashSet<String>();
-				for (HashtagEntity hash : hashtagList){
+				for (HashtagEntity hash : hashtagList) {
 					hashtags.add(hash.getText());
 				}
-				currentTweets.add(new Tweet(message.getText(), hashtags, message.getSender().getScreenName()));
+				String tweetText=getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName())).toString();
+				postTweet(tweetText+"\n@" +message.getSenderScreenName());
 			}
 			@Override
 			public void onStatus(Status status) {
@@ -226,7 +237,7 @@ public class TwitterActions {
 					counter++;
 				}
 				else sleep();
-				
+
 			}
 			@Override
 			public void onTrackLimitationNotice(int arg0) {}

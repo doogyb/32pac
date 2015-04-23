@@ -22,7 +22,9 @@ public class LyricsDB {
         Elements element = null;
 
         for (int i = 0; i < MAX_ATTEMPTS; i++) {
-            try {element = Jsoup.connect(url).get().select(element_name);}
+            try {element = Jsoup.connect(url).get().select(element_name);
+                if (i>0) System.out.println("Attempt number " +i);
+            }
             catch (IOException e) {continue;}
             break;
         }
@@ -35,13 +37,13 @@ public class LyricsDB {
         for (Element artist : top50Artists) {
             String artistName = artist.text();
             System.out.println("\n[+] Downloading songs by " + artistName);
-            Elements songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
-            while (songs == null) {
-                songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
-                System.out.println("Hanging on song name");
-                try {Thread.sleep(500);}
-                catch (InterruptedException e) {System.err.println("Caught IOException: " + e.getMessage());}
+            Elements songs;
+
+            if ((songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]"))==null) {
+                System.out.println("[-] Skipping songs by " + artist);
+                continue;
             }
+
             for (Element song : songs) {
                 String songURL = song.attr("abs:href");
                 String songFileName = "lyrics/" + song.text().replace("/","") + ".txt";

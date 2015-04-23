@@ -2,6 +2,7 @@ import AI.NaturalLanguage;
 import AI.RhymeLine;
 import AI.LyricChooser;
 import TwitterInteraction.Tweet;
+import TwitterInteraction.TwitterActions;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,14 +14,8 @@ import java.util.Set;
 public class MainPac {
 
     public static void main (String[] args) {
-
-        Tweet tw = new Tweet("my main hammer", new HashSet(), "fergyPoo");
-        LyricChooser lc = new LyricChooser(tw);
-        lc.chooseLyrics();
-        String tweetMessage = lc.selectBest() + "\n@" + tw.getUserName();
-        System.out.println(tweetMessage);
-
-
-        for (RhymeLine line : lc.rhymeLines) System.out.println(line.toString());
+        TwitterActions TA = new TwitterActions();
+        TA.authorization();
+        TA.listener();
     }
 }
