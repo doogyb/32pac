@@ -93,7 +93,7 @@ public class NaturalLanguage {
 			if (matched == 1) {
 				input = input.substring(pos);
 				matched = 0;
-				System.out.println(match); //testing
+				//System.out.println(match); //testing
 				out.add(match);
 			}
 			else {

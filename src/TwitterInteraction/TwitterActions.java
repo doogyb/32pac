@@ -45,6 +45,20 @@ public class TwitterActions {
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 	Set<Tweet> currentTweets = new HashSet<Tweet>();
 
+	public RhymeLine handleTweets(){
+		int bestScore = 0, currentScore = 0;
+		RhymeLine bestRhymeLine = null;
+		for (Tweet tweet : currentTweets) {
+			RhymeLine currentRhymeLine = getTweetText(tweet);
+			currentScore = currentRhymeLine.get_score();
+			if (currentScore > bestScore){
+				bestRhymeLine = currentRhymeLine;
+				bestScore = currentScore;
+			}
+		}
+		return bestRhymeLine;
+	}
+	
 	public static RhymeLine getTweetText(Tweet tw) {
 		LyricChooser lc = new LyricChooser(tw);
 		lc.chooseLyrics();
@@ -159,7 +173,7 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList) {
 					hashtags.add(hash.getText());
 				}
-				String tweetText=getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName())).toString();
+				String tweetText = getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName())).toString();
 				postTweet(tweetText+"\n@" +message.getSenderScreenName());
 			}
 			@Override
@@ -192,9 +206,7 @@ public class TwitterActions {
 			@Override
 			public void onDeletionNotice(StatusDeletionNotice arg0) {}
 			@Override
-			public void onUserProfileUpdate(User arg0) {
-				System.out.println("Got a tweet from someone");
-			}
+			public void onUserProfileUpdate(User arg0) {}
 			@Override
 			public void onUserListUpdate(User arg0, UserList arg1) {}
 			@Override
@@ -253,10 +265,9 @@ public class TwitterActions {
 					System.out.println(status.getText());
 					counter++;
 				}
-				else handleTweets();
-			}
-			public void handleTweets(){
-				return;
+				else{
+					postTweet(handleTweets().toString());
+				}
 			}
 			@Override
 			public void onTrackLimitationNotice(int arg0) {}
@@ -299,7 +310,7 @@ public class TwitterActions {
 		//client.getTokens();
 		client.readTokens();
 		client.authorization();
-		//client.listener();
+		client.listener();
 		client.getTrendtweets();
 	}
 }
