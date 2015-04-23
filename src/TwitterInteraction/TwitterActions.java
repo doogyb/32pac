@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import AI.LyricChooser;
+import AI.NaturalLanguage;
 import AI.RhymeLine;
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
@@ -39,6 +40,7 @@ public class TwitterActions {
 	 */
 
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
+	private static String ourUserNameMention = "@32_Pac";
 	private static Twitter twitter = new TwitterFactory().getInstance();
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 	Set<Tweet> currentTweets = new HashSet<Tweet>();
@@ -148,9 +150,10 @@ public class TwitterActions {
 	}
 
 	public void listener(){
-		UserStreamListener userStreamListener = new UserStreamListener() {
+		final UserStreamListener userStreamListener = new UserStreamListener() {
 			@Override
 			public void onDirectMessage(DirectMessage message) {
+				System.out.println("Replying to direct message");
 				HashtagEntity[] hashtagList = message.getHashtagEntities();
 				Set<String> hashtags = new HashSet<String>();
 				for (HashtagEntity hash : hashtagList) {
@@ -161,12 +164,24 @@ public class TwitterActions {
 			}
 			@Override
 			public void onStatus(Status status) {
-				HashtagEntity[] hashtagList = status.getHashtagEntities();
-				Set<String> hashtags = new HashSet<String>();
-				for (HashtagEntity hash : hashtagList){
-					hashtags.add(hash.getText());
+				if (status.getText().contains(ourUserNameMention)) {
+					System.out.println("recieved tweet from " + status.getUser().getScreenName() +
+							"saying " + status.getText());
+					HashtagEntity[] hashtagList = status.getHashtagEntities();
+					Set<String> hashtags = new HashSet<String>();
+					for (HashtagEntity hash : hashtagList) {
+						hashtags.add(hash.getText());
+					}
+					String text = status.getText();
+					String lastWord = NaturalLanguage.getLastWord(status.getText());
+					while ( lastWord.contains(("@"))) {
+						text = text.substring(0, text.length() - lastWord.length());
+						lastWord = NaturalLanguage.getLastWord(text);
+					}
+					if (text.length() < 1) return;
+					String tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName())).toString();
+					postTweet(tweetText + "\n@" + status.getUser().getScreenName());
 				}
-				currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
 			}
 			@Override
 			public void onException(Exception arg0) {}
@@ -177,7 +192,9 @@ public class TwitterActions {
 			@Override
 			public void onDeletionNotice(StatusDeletionNotice arg0) {}
 			@Override
-			public void onUserProfileUpdate(User arg0) {}
+			public void onUserProfileUpdate(User arg0) {
+				System.out.println("Got a tweet from someone");
+			}
 			@Override
 			public void onUserListUpdate(User arg0, UserList arg1) {}
 			@Override
