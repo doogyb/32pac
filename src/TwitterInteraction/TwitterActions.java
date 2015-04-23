@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -43,18 +44,21 @@ public class TwitterActions {
 	private static String ourUserNameMention = "@32_Pac";
 	private static Twitter twitter = new TwitterFactory().getInstance();
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
-	Set<Tweet> currentTweets = new HashSet<Tweet>();
+	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
 
 	public RhymeLine handleTweets(){
+		System.out.println("Called");
+		System.out.println("Contents of cw: " + currentTweets);
 		int bestScore = 0, currentScore = 0;
 		RhymeLine bestRhymeLine = null;
 		for (Tweet tweet : currentTweets) {
-			RhymeLine currentRhymeLine = getTweetText(tweet);
-			currentScore = currentRhymeLine.get_score();
-			if (currentScore > bestScore){
-				bestRhymeLine = currentRhymeLine;
-				bestScore = currentScore;
-			}
+			System.out.println("TWEET = " + getTweetText(tweet));
+//			RhymeLine currentRhymeLine = getTweetText(tweet);
+//			currentScore = currentRhymeLine.get_score();
+//			if (currentScore > bestScore){
+//				bestRhymeLine = currentRhymeLine;
+//				bestScore = currentScore;
+//			}
 		}
 		return bestRhymeLine;
 	}
@@ -187,11 +191,7 @@ public class TwitterActions {
 						hashtags.add(hash.getText());
 					}
 					String text = status.getText();
-					String lastWord = NaturalLanguage.getLastWord(status.getText());
-					while ( lastWord.contains(("@"))) {
-						text = text.substring(0, text.length() - lastWord.length());
-						lastWord = NaturalLanguage.getLastWord(text);
-					}
+					text=NaturalLanguage.removeLastWords(text);
 					if (text.length() < 1) return;
 					String tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName())).toString();
 					postTweet(tweetText + "\n@" + status.getUser().getScreenName());
@@ -244,7 +244,7 @@ public class TwitterActions {
 		twitterStream.user();
 	}
 
-	public void getTrendtweets(){
+	public void trendTweetListener(){
 		StatusListener listener = new StatusListener() {
 			int counter = 0;
 			@Override
@@ -261,11 +261,15 @@ public class TwitterActions {
 					hashtags.add(hash.getText());
 				}
 				if (counter < 5){
-					currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
-					System.out.println(status.getText());
+					String text=NaturalLanguage.removeLastWords(status.getText());
+					currentTweets.add(new Tweet(text, hashtags, status.getUser().getScreenName()));
+					System.out.println("GETTING STATUS:" + status.getText());
+					System.out.println("Text being sent: " + text);
+					System.out.println("\n\ncounter = " + counter);
 					counter++;
 				}
-				else{
+				if (counter==5) {
+					System.out.println("Reached");
 					postTweet(handleTweets().toString());
 				}
 			}
@@ -304,13 +308,13 @@ public class TwitterActions {
 	}
 
 
-	public static void main(String[] args) throws Exception {
-		TwitterActions client = new TwitterActions();
-		client.readKeys();
-		//client.getTokens();
-		client.readTokens();
-		client.authorization();
-		client.listener();
-		client.getTrendtweets();
-	}
+//	public static void main(String[] args) throws Exception {
+//		TwitterActions client = new TwitterActions();
+//		client.readKeys();
+//		//client.getTokens();
+//		client.readTokens();
+//		client.authorization();
+//		client.listener();
+//		client.trendTweetListener();
+//	}
 }

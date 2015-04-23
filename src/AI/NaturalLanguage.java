@@ -31,23 +31,46 @@ public class NaturalLanguage {
         return dict;
 	}
 
-    public static String removeLastWords(String input) {
-        String lastWord = NaturalLanguage.getLastWord(input);
+//    public static String removeLastWords(String input) {
+//        String lastWord = NaturalLanguage.getLastWord(input);
+//
+//        while ( lastWord.charAt(0) == '@' || lastWord.charAt(0) == '#' || lastWord.contains("http://t.co") || lastWord.contains("https://t.co")) {
+//            input = input.substring(0, input.length() - lastWord.length()-1);
+//            lastWord = NaturalLanguage.getLastWord(input);
+//        }
+//        String last="";
+//        int i;
+//        for (i = lastWord.toCharArray().length - 1; i >= 0; i--) {
+//            if (Character.isLetterOrDigit(lastWord.charAt(i)) && lastWord.charAt(i)!=' ')
+//                break;
+//        }
+//
+//        return input.substring(0,input.length()-lastWord.length()-1) + lastWord.substring(0,i+1);
+//    }
 
-        while ( lastWord.charAt(0) == '@') {
-            input = input.substring(0, input.length() - lastWord.length());
-            lastWord = NaturalLanguage.getLastWord(input);
+    public static String removeLastWords(String input) {
+        String[] in = input.split(" ");
+        Boolean miss=false;
+        for (int i = in.length - 1; i >= 0; i--) {
+            for (int j=0; j<in[i].length()-1; j++) {
+                if (!Character.isLetter(in[i].charAt(j))) {
+                    miss = true;
+                    break;
+                }
+            }
+            if (!miss) {
+                if (!Character.isLetter((in[i].charAt(in[i].length()-1))))
+                    in[i]=in[i].substring(0,in[i].length()-1);
+                String out="";
+                for (int k=0; k<=i;k++)
+                    out+=in[k] + " ";
+                return out;
+            }
+            miss=false;
         }
-        String last="";
-        int i;
-        for (i = lastWord.toCharArray().length - 1; i >= 0; i--) {
-            if (Character.isLetterOrDigit(lastWord.charAt(i)))
-                break;
-        }
-        System.out.println("lastWord: " + lastWord);
-        return input.substring(0,input.length()-lastWord.length()-1) + lastWord.substring(0,i);
+        return null;
     }
-	
+
     public static int numberOfSyllables(String input) {
         int syllablesCount = 0;
         char[] word = input.toCharArray();
