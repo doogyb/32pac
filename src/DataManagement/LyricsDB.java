@@ -12,6 +12,7 @@ import java.io.*;
 public class LyricsDB {
     private static final String dbURL = "http://ohhla.com/favorite.html";
     private String url;
+    private static final int MAX_ATTEMPTS = 25;
 
     private LyricsDB(String inputURL) {
         url = inputURL;
@@ -19,8 +20,12 @@ public class LyricsDB {
 
     private Elements getHtmlElement(String url ,String element_name) {
         Elements element = null;
-        try {element = Jsoup.connect(url).get().select(element_name);}
-        catch (IOException e) {return null;}
+
+        for (int i = 0; i < MAX_ATTEMPTS; i++) {
+            try {element = Jsoup.connect(url).get().select(element_name);}
+            catch (IOException e) {continue;}
+            break;
+        }
         return element;
     }
 
@@ -68,8 +73,8 @@ public class LyricsDB {
     public static void main(String[] args) {
         LyricsDB db = new LyricsDB(dbURL);
         db.downloadSongs();
-        db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
-        System.out.println(db.haveLyrics());
+        //db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
+        //System.out.println(db.haveLyrics());
 
     }
 }
