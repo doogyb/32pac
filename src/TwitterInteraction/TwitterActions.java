@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import AI.LyricChooser;
 import AI.NaturalLanguage;
 import AI.RhymeLine;
@@ -260,7 +259,7 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				if (counter < 5){
+				if (counter < 1){
 					String text=NaturalLanguage.removeLastWords(status.getText());
 					currentTweets.add(new Tweet(text, hashtags, status.getUser().getScreenName()));
 					System.out.println("GETTING STATUS:" + status.getText());
@@ -268,9 +267,9 @@ public class TwitterActions {
 					System.out.println("\n\ncounter = " + counter);
 					counter++;
 				}
-				if (counter==5) {
-					System.out.println("Reached");
-					postTweet(handleTweets().toString());
+				else {
+					System.out.println("Done.");
+					twitterStream.shutdown();
 				}
 			}
 			@Override
@@ -288,6 +287,7 @@ public class TwitterActions {
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
+			//postTweet(handleTweets().toString());
 			twitterStream.removeListener(listener);
 		}
 	}
@@ -314,7 +314,7 @@ public class TwitterActions {
 //		//client.getTokens();
 //		client.readTokens();
 //		client.authorization();
-//		client.listener();
+//		//client.listener();
 //		client.trendTweetListener();
 //	}
 }
