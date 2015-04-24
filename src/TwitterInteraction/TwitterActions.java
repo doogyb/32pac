@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import AI.LyricChooser;
 import AI.NaturalLanguage;
 import AI.RhymeLine;
@@ -45,23 +46,25 @@ public class TwitterActions {
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
 
-	public RhymeLine handleTweets(){
+	public String handleTweets(){
 		System.out.println("Called");
 		System.out.println("Contents of cw: " + currentTweets);
 		int bestScore = 0, currentScore = 0;
 		RhymeLine bestRhymeLine = null;
+		String username = null;
 		for (Tweet tweet : currentTweets) {
 			System.out.println("TWEET = " + getTweetText(tweet));
-//			RhymeLine currentRhymeLine = getTweetText(tweet);
-//			currentScore = currentRhymeLine.get_score();
-//			if (currentScore > bestScore){
-//				bestRhymeLine = currentRhymeLine;
-//				bestScore = currentScore;
-//			}
+			RhymeLine currentRhymeLine = getTweetText(tweet);
+			currentScore = currentRhymeLine.get_score();
+			if (currentScore > bestScore){
+				bestRhymeLine = currentRhymeLine;
+				bestScore = currentScore;
+				username = tweet.getUserName();
+			}
 		}
-		return bestRhymeLine;
+		return bestRhymeLine.toString() + "\n@" + username;
 	}
-	
+
 	public static RhymeLine getTweetText(Tweet tw) {
 		LyricChooser lc = new LyricChooser(tw);
 		lc.chooseLyrics();
@@ -268,7 +271,7 @@ public class TwitterActions {
 					counter++;
 				}
 				else {
-					System.out.println("Done.");
+					System.out.println("Done with listener.");
 					twitterStream.shutdown();
 				}
 			}
@@ -283,11 +286,12 @@ public class TwitterActions {
 			twitterStream.addListener(listener);
 			twitterStream.filter(fq);
 			try {
-				TimeUnit.SECONDS.sleep(180);          
+				TimeUnit.SECONDS.sleep(10);          
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
-			//postTweet(handleTweets().toString());
+			System.out.println("Resuming.");
+			postTweet(handleTweets());
 			twitterStream.removeListener(listener);
 		}
 	}
@@ -308,13 +312,13 @@ public class TwitterActions {
 	}
 
 
-//	public static void main(String[] args) throws Exception {
-//		TwitterActions client = new TwitterActions();
-//		client.readKeys();
-//		//client.getTokens();
-//		client.readTokens();
-//		client.authorization();
-//		//client.listener();
-//		client.trendTweetListener();
-//	}
+	public static void main(String[] args) throws Exception {
+		TwitterActions client = new TwitterActions();
+		client.readKeys();
+		//client.getTokens();
+		client.readTokens();
+		client.authorization();
+		//client.listener();
+		client.trendTweetListener();
+	}
 }
