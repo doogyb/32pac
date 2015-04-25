@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import AI.LyricChooser;
 import AI.NaturalLanguage;
 import AI.RhymeLine;
@@ -62,7 +61,7 @@ public class TwitterActions {
 				username = tweet.getUserName();
 			}
 		}
-		return bestRhymeLine.toString() + "\n@" + username;
+		return NaturalLanguage.filter(bestRhymeLine.toString() + "\n@" + username);
 	}
 
 	public static RhymeLine getTweetText(Tweet tw) {
@@ -93,13 +92,6 @@ public class TwitterActions {
 		catch(Exception e){
 			System.out.println("Tweet Error!!!!!!!");
 		}
-	}
-
-	public void getTimeLine() throws TwitterException{
-		ResponseList<Status> list = twitter.getHomeTimeline();
-		for(Status each: list){
-			System.out.println("Sent By: @" + each.getUser().getScreenName() + " - " + " " + each.getUser().getName() + "\n" + each.getText() + "\n");
-		}   
 	}
 
 	public void getTokens() throws TwitterException, IOException {	//keys must be set before calling this
@@ -262,7 +254,7 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				if (counter < 1){
+				if (counter < 5){
 					String text=NaturalLanguage.removeLastWords(status.getText());
 					currentTweets.add(new Tweet(text, hashtags, status.getUser().getScreenName()));
 					System.out.println("GETTING STATUS:" + status.getText());
@@ -286,7 +278,7 @@ public class TwitterActions {
 			twitterStream.addListener(listener);
 			twitterStream.filter(fq);
 			try {
-				TimeUnit.SECONDS.sleep(10);          
+				TimeUnit.MINUTES.sleep(30);          
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
@@ -309,16 +301,5 @@ public class TwitterActions {
 			System.out.println(out[i]);
 		}
 		return out;
-	}
-
-
-	public static void main(String[] args) throws Exception {
-		TwitterActions client = new TwitterActions();
-		client.readKeys();
-		//client.getTokens();
-		client.readTokens();
-		client.authorization();
-		//client.listener();
-		client.trendTweetListener();
 	}
 }
