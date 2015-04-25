@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import AI.LyricChooser;
-import AI.NaturalLanguage;
-import AI.RhymeLine;
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
@@ -34,6 +30,8 @@ import twitter4j.UserList;
 import twitter4j.UserStreamListener;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
+import AI.LyricChooser;
+import AI.RhymeLine;
 
 public class TwitterActions {
 	/**

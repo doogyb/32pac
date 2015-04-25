@@ -1,8 +1,6 @@
 package AI;
 
-import DataManagement.LyricsDB;
 import TwitterInteraction.Tweet;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

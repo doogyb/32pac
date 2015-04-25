@@ -23,8 +23,10 @@ public class NaturalLanguage {
         try {
             BufferedReader br = new BufferedReader(new FileReader("unix.dict"));
             String line;
-            while ((line=br.readLine())!=null)
+            while ((line=br.readLine())!=null){
                 if (line.length() > 3) dict.add(line);
+            }
+            br.close();
         } catch (IOException e) { e.printStackTrace(); }
         return dict;
     }
@@ -83,6 +85,31 @@ public class NaturalLanguage {
         }
         catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
         return rhymes;
+    }
+    
+    public static String filter(String rhyme){
+		byte[][] words = {new byte[]{78, 105, 103, 103, 101, 114}, new byte[]{110, 105, 103, 103, 101, 114},
+						  new byte[]{78, 105, 103, 103, 97}, new byte[]{110, 105, 103, 103, 97},
+						  new byte[]{80, 117, 115, 115, 121}, new byte[]{112, 117, 115, 115, 121},
+						  new byte[]{70, 117, 99, 107}, new byte[]{102, 117, 99, 107},
+						  new byte[]{83, 104, 105, 116}, new byte[]{115, 104, 105, 116},
+						  new byte[]{68, 105, 99, 107}, new byte[]{100, 105, 99, 107}
+		};
+
+		byte[][] filter = {new byte[]{78, 105, 42, 42, 101, 114}, new byte[]{110, 105, 42, 42, 101, 114},
+						   new byte[]{78, 105, 42, 42, 97}, new byte[]{110, 105, 42, 42, 97},
+						   new byte[]{80, 117, 42, 42, 121}, new byte[]{112, 117, 42, 42, 121},
+						   new byte[]{70, 42, 42, 107}, new byte[]{102, 42, 42, 107},
+						   new byte[]{83, 42, 42, 116}, new byte[]{115, 42, 42, 116},
+						   new byte[]{68, 42, 99, 107}, new byte[]{100, 42, 99, 107}
+		};
+		for (int i = 0; i < 12; i++){
+			String x = new String(words[i]);
+			if (rhyme.contains(x)){
+				rhyme = rhyme.replace(x, new String(filter[i]));
+			}
+		}
+		return rhyme;
     }
 
     public static ArrayList<String> splitString(String input) {
