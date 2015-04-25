@@ -17,11 +17,9 @@ public class RhymeLine {
         return line1 + "\n" + line2;
     }
     
-    public int get_score(){
+    public int getScore(){
     	return score;
     }
     
-    public void set_score(int input){
-    	score = input;
-    }
+    public void setScore(int input){ score = input; }
 }
