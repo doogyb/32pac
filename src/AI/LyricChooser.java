@@ -26,6 +26,7 @@ public class LyricChooser {
     public LyricChooser(Tweet tweet) {
         this.tweet = tweet;
         this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
+        System.out.println("[++] rhyming with " + tweet.getRhymeWord());
     }
 
     public void chooseLyrics() {
@@ -78,7 +79,7 @@ public class LyricChooser {
 
     public RhymeLine selectBest() {
         int maxScore = 0;
-        RhymeLine bestLine=null;
+        RhymeLine bestLine = rhymeLines.get(0);
         for (RhymeLine line : rhymeLines) {
             String fullRhyme = line.line1+line.line2;
             //check if last word and rhyme word have the same number of sels
@@ -102,6 +103,7 @@ public class LyricChooser {
 
         }
         bestLine.set_score(maxScore);
+        System.out.println("score is " + bestLine.get_score());
         return bestLine;
     }
 }
