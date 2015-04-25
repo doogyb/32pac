@@ -40,7 +40,6 @@ public class NaturalLanguage {
 
         for (i = inputArray.length-1; i >= 0; i--) {
             String currentWord = inputArray[i].substring(0, inputArray[i].length()-1);
-            System.out.println("processing " + currentWord);
             Pattern wordPattern = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE);
             Matcher m = wordPattern.matcher(currentWord);
 
@@ -119,4 +118,6 @@ public class NaturalLanguage {
 		}
 		return out;
 	}
+
+
 }
