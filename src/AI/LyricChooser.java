@@ -78,6 +78,7 @@ public class LyricChooser {
     }
 
     public RhymeLine selectBest() {
+        if (rhymeLines.size() == 0) return null;
         int maxScore = 0;
         RhymeLine bestLine = rhymeLines.get(0);
         for (RhymeLine line : rhymeLines) {
@@ -103,7 +104,6 @@ public class LyricChooser {
 
         }
         bestLine.set_score(maxScore);
-        System.out.println("score is " + bestLine.get_score());
         return bestLine;
     }
 }
