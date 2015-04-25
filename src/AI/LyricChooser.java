@@ -1,14 +1,12 @@
 package AI;
 
-import DataManagement.LyricsDB;
-import TwitterInteraction.Tweet;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import TwitterInteraction.Tweet;
 
 /**
  * Created by samuel on 08/04/15.

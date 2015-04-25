@@ -2,7 +2,6 @@ package AI;
 
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -25,8 +23,10 @@ public class NaturalLanguage {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader("unix.dict"));
 			String line;
-			while ((line=br.readLine())!=null)
+			while ((line=br.readLine())!=null){
 				if (line.length() > 3) dict.add(line);
+			}
+			br.close();
 		} catch (IOException e) { e.printStackTrace(); }
 		return dict;
 	}

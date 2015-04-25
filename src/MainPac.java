@@ -1,11 +1,8 @@
-import AI.NaturalLanguage;
-import DataManagement.LyricsDB;
-import TwitterInteraction.TwitterActions;
-
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import DataManagement.LyricsDB;
+import TwitterInteraction.TwitterActions;
 
 /**
  * Created by doogy on 17/04/15.
