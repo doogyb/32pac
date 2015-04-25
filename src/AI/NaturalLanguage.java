@@ -139,5 +139,9 @@ public class NaturalLanguage {
         }
         return out;
     }
+    
+     public static String[] splitHashtag(String input) {
+        return input.split("(?=[A-Z])");
+    }
 
 }
