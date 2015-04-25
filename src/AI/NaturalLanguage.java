@@ -2,7 +2,6 @@ package AI;
 
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,16 +9,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Created by samuel on 16/04/15.
  */
 public class NaturalLanguage {
-
     static Set<String> dict = genDict();
 
     public static HashSet<String> genDict() {
@@ -32,7 +28,6 @@ public class NaturalLanguage {
         } catch (IOException e) { e.printStackTrace(); }
         return dict;
     }
-
 
     public static String getLastTweetWord(String input) {
         String inputArray[] = input.split(" ");
@@ -58,9 +53,7 @@ public class NaturalLanguage {
                 syllablesCount++;
                 while (isVowel(word[i]) && i < word.length-1) i++;
             }
-        }
-
-        return syllablesCount;
+        } return syllablesCount;
     }
 
     public static boolean isVowel(char c) {
