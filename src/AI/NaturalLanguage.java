@@ -44,9 +44,8 @@ public class NaturalLanguage {
             catch (StringIndexOutOfBoundsException e) {continue;}
             inputArray[i] = inputArray[i].substring(0, end+1);
             Pattern wordPattern = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE);
-            Matcher m = wordPattern.matcher(inputArray[i]);
 
-            if (!m.find()) break;
+            if (!wordPattern.matcher(inputArray[i]).find() && !inputArray[i].equals("http")) break;
         } return inputArray[i];
     }
 
@@ -120,5 +119,5 @@ public class NaturalLanguage {
         }
         return out;
     }
-    
+
 }
