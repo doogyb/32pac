@@ -11,9 +11,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import AI.LyricChooser;
+import AI.NaturalLanguage;
+import AI.RhymeLine;
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
+import twitter4j.ResponseList;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
@@ -29,9 +34,6 @@ import twitter4j.UserList;
 import twitter4j.UserStreamListener;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
-import AI.LyricChooser;
-import AI.NaturalLanguage;
-import AI.RhymeLine;
 
 public class TwitterActions {
 	/**
@@ -45,8 +47,8 @@ public class TwitterActions {
 	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
 
 	public String handleTweets(){
-		System.out.println("Called");
-		System.out.println("Contents of cw: " + currentTweets);
+		System.out.println("[+] Generating tweet ..");
+		//System.out.println("Contents of cw: " + currentTweets);
 		int bestScore = 0, currentScore = 0;
 		RhymeLine bestRhymeLine = null;
 		String username = null;
@@ -60,7 +62,7 @@ public class TwitterActions {
 				username = tweet.getUserName();
 			}
 		}
-		return NaturalLanguage.filter(bestRhymeLine.toString() + "\n@" + username);
+		return bestRhymeLine.toString() + "\n@" + username;
 	}
 
 	public static RhymeLine getTweetText(Tweet tw) {
@@ -91,6 +93,13 @@ public class TwitterActions {
 		catch(Exception e){
 			System.out.println("Tweet Error!!!!!!!");
 		}
+	}
+
+	public void getTimeLine() throws TwitterException{
+		ResponseList<Status> list = twitter.getHomeTimeline();
+		for(Status each: list){
+			System.out.println("Sent By: @" + each.getUser().getScreenName() + " - " + " " + each.getUser().getName() + "\n" + each.getText() + "\n");
+		}   
 	}
 
 	public void getTokens() throws TwitterException, IOException {	//keys must be set before calling this
@@ -176,7 +185,7 @@ public class TwitterActions {
 			@Override
 			public void onStatus(Status status) {
 				if (status.getText().contains(ourUserNameMention)) {
-					System.out.println("recieved tweet from " + status.getUser().getScreenName() +
+					System.out.println("[+] Recieved tweet from " + status.getUser().getScreenName() +
 							"saying " + status.getText());
 					HashtagEntity[] hashtagList = status.getHashtagEntities();
 					Set<String> hashtags = new HashSet<String>();
@@ -184,7 +193,7 @@ public class TwitterActions {
 						hashtags.add(hash.getText());
 					}
 					String text = status.getText();
-					text=NaturalLanguage.removeLastWords(text);
+
 					if (text.length() < 1) return;
 					String tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName())).toString();
 					postTweet(tweetText + "\n@" + status.getUser().getScreenName());
@@ -253,16 +262,13 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				if (counter < 5){
-					String text=NaturalLanguage.removeLastWords(status.getText());
-					currentTweets.add(new Tweet(text, hashtags, status.getUser().getScreenName()));
-					System.out.println("GETTING STATUS:" + status.getText());
-					System.out.println("Text being sent: " + text);
-					System.out.println("\n\ncounter = " + counter);
+				if (counter < 1){
+					currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
+					System.out.println("\n[+] GETTING STATUS:" + status.getText());
 					counter++;
 				}
 				else {
-					System.out.println("Done with listener.");
+					System.out.println("\n [+] Quitting listener.");
 					twitterStream.shutdown();
 				}
 			}
@@ -277,12 +283,13 @@ public class TwitterActions {
 			twitterStream.addListener(listener);
 			twitterStream.filter(fq);
 			try {
-				TimeUnit.MINUTES.sleep(30);          
+				TimeUnit.SECONDS.sleep(10);          
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
 			System.out.println("Resuming.");
-			postTweet(handleTweets());
+			//postTweet(handleTweets());
+			System.out.println("[++] Final tweet is " + handleTweets());
 			twitterStream.removeListener(listener);
 		}
 	}
