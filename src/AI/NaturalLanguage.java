@@ -55,7 +55,7 @@ public class NaturalLanguage {
         for (int i = 0; i < word.length-1; i++) {
             if (isVowel(word[i])) {
                 syllablesCount++;
-                while (isVowel(word[i])) i++;
+                while (isVowel(word[i]) && i < word.length-1) i++;
             }
         }
 
@@ -118,6 +118,5 @@ public class NaturalLanguage {
 		}
 		return out;
 	}
-
-
+    
 }
