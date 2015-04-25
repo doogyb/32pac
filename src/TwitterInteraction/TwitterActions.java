@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
@@ -31,6 +32,7 @@ import twitter4j.UserStreamListener;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import AI.LyricChooser;
+import AI.NaturalLanguage;
 import AI.RhymeLine;
 
 public class TwitterActions {
@@ -62,7 +64,7 @@ public class TwitterActions {
 			}
 		}
 		if (bestRhymeLine == null) return null;
-		return bestRhymeLine.toString() + "\n@" + username;
+		return NaturalLanguage.filter(bestRhymeLine.toString()) + "\n@" + username;
 	}
 
 	public static RhymeLine getTweetText(Tweet tw) {
