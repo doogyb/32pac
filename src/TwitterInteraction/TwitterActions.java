@@ -48,14 +48,12 @@ public class TwitterActions {
 
 	public String handleTweets(){
 		System.out.println("[+] Generating tweet ..");
-		//System.out.println("Contents of cw: " + currentTweets);
 		int bestScore = 0, currentScore = 0;
 		RhymeLine bestRhymeLine = null;
 		String username = null;
 		for (Tweet tweet : currentTweets) {
 			RhymeLine currentRhymeLine = getTweetText(tweet);
 			if (currentRhymeLine == null) continue;
-			//System.out.println("TWEET = " + currentRhymeLine);
 			currentScore = currentRhymeLine.get_score();
 			if (currentScore > bestScore){
 				bestRhymeLine = currentRhymeLine;
@@ -185,8 +183,6 @@ public class TwitterActions {
 				RhymeLine tweetText = getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName()));
 				if (tweetText != null) postTweet(tweetText.toString()+"\n@" +message.getSenderScreenName());
 				else {System.out.println("[-] Could not rhyme with that tweet :(");}
-				//String tweetText = getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName())).toString();
-				//postTweet(tweetText+"\n@" +message.getSenderScreenName());
 			}
 			@Override
 			public void onStatus(Status status) {
