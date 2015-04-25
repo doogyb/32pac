@@ -20,18 +20,18 @@ import java.util.regex.Pattern;
  */
 public class NaturalLanguage {
 
-	static Set<String> dict = genDict();
-			
-	public static HashSet<String> genDict() {
-		HashSet<String> dict = new HashSet<String>();
-		try {
-			BufferedReader br = new BufferedReader(new FileReader("unix.dict"));
-			String line;
-			while ((line=br.readLine())!=null)
-				if (line.length() > 3) dict.add(line);
-		} catch (IOException e) { e.printStackTrace(); }
+    static Set<String> dict = genDict();
+
+    public static HashSet<String> genDict() {
+        HashSet<String> dict = new HashSet<String>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("unix.dict"));
+            String line;
+            while ((line=br.readLine())!=null)
+                if (line.length() > 3) dict.add(line);
+        } catch (IOException e) { e.printStackTrace(); }
         return dict;
-	}
+    }
 
 
     public static String getLastTweetWord(String input) {
@@ -39,13 +39,15 @@ public class NaturalLanguage {
         int i;
 
         for (i = inputArray.length-1; i >= 0; i--) {
-            String currentWord = inputArray[i].substring(0, inputArray[i].length()-1);
+            int end;
+            try {for (end = inputArray[i].length() - 1; !Character.isLetterOrDigit(inputArray[i].charAt(end)); end--);}
+            catch (StringIndexOutOfBoundsException e) {continue;}
+            inputArray[i] = inputArray[i].substring(0, end+1);
             Pattern wordPattern = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE);
-            Matcher m = wordPattern.matcher(currentWord);
+            Matcher m = wordPattern.matcher(inputArray[i]);
 
             if (!m.find()) break;
-        }
-        return inputArray[i];
+        } return inputArray[i];
     }
 
     public static int numberOfSyllables(String input) {
@@ -90,33 +92,33 @@ public class NaturalLanguage {
         catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
         return rhymes;
     }
-    
+
     public static ArrayList<String> splitString(String input) {
-		ArrayList<String> out = new ArrayList<String>();
-    	int pos = 0, matched = 0;
-		String match = "";
-		if (input.length() < 3) return null;
-		if (dict.contains(input)) return null;
-		while (input.length() != 0){
-			for (int i = 1; i <= input.length(); i++) {
-				String split = input.substring(0, i);
-				if (dict.contains(split)) {
-					match = split;
-					pos = i;
-					matched = 1;
-				}
-			}
-			if (matched == 1) {
-				input = input.substring(pos);
-				matched = 0;
-				//System.out.println(match); //testing
-				out.add(match);
-			}
-			else {
-				input = input.substring(1);
-			}
-		}
-		return out;
-	}
+        ArrayList<String> out = new ArrayList<String>();
+        int pos = 0, matched = 0;
+        String match = "";
+        if (input.length() < 3) return null;
+        if (dict.contains(input)) return null;
+        while (input.length() != 0){
+            for (int i = 1; i <= input.length(); i++) {
+                String split = input.substring(0, i);
+                if (dict.contains(split)) {
+                    match = split;
+                    pos = i;
+                    matched = 1;
+                }
+            }
+            if (matched == 1) {
+                input = input.substring(pos);
+                matched = 0;
+                //System.out.println(match); //testing
+                out.add(match);
+            }
+            else {
+                input = input.substring(1);
+            }
+        }
+        return out;
+    }
     
 }
