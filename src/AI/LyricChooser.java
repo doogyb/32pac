@@ -5,8 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Created by samuel on 08/04/15.
@@ -25,6 +24,7 @@ public class LyricChooser {
         this.tweet = tweet;
         this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
         System.out.println("[++] rhyming with " + tweet.getRhymeWord());
+        System.out.println("[++] Hashtag is " + tweet.getHashtags());
     }
 
     public void chooseLyrics() {
@@ -101,7 +101,7 @@ public class LyricChooser {
             }
 
         }
-        bestLine.set_score(maxScore);
+        bestLine.setScore(maxScore);
         return bestLine;
     }
 }
