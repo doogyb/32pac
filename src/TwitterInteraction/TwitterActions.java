@@ -54,7 +54,7 @@ public class TwitterActions {
 		for (Tweet tweet : currentTweets) {
 			RhymeLine currentRhymeLine = getTweetText(tweet);
 			if (currentRhymeLine == null) continue;
-			currentScore = currentRhymeLine.get_score();
+			currentScore = currentRhymeLine.getScore();
 			if (currentScore > bestScore){
 				bestRhymeLine = currentRhymeLine;
 				bestScore = currentScore;
