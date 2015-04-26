@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
@@ -17,6 +18,7 @@ import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
 import twitter4j.StatusListener;
+import twitter4j.StatusUpdate;
 import twitter4j.Trends;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -43,8 +45,9 @@ public class TwitterActions {
 	private static String ourUserNameMention = "@32_Pac";
 	private static Twitter twitter = new TwitterFactory().getInstance();
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
+	private static long statusId = 0;
 	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
-	
+
 	//Sets the keys and tokens.
 	public void authorization() {
 		readKeys();
@@ -128,6 +131,7 @@ public class TwitterActions {
 			@Override
 			public void onDirectMessage(DirectMessage message) {
 				System.out.println("Replying to direct message");
+				statusId = 0;
 				respondToMention(message.getHashtagEntities(), message.getText(),
 						message.getSender().getScreenName(), message.getSenderScreenName());
 			}
@@ -137,7 +141,7 @@ public class TwitterActions {
 				if (status.getText().contains(ourUserNameMention)) {
 					System.out.println("\n[+] Recieved tweet from " + status.getUser().getScreenName() +
 							"saying " + status.getText());
-
+					statusId = status.getInReplyToStatusId();
 					respondToMention(status.getHashtagEntities(), status.getText(),
 							status.getUser().getScreenName(), status.getUser().getScreenName());
 				}
@@ -204,9 +208,8 @@ public class TwitterActions {
 				HashtagEntity[] hashtagList = status.getHashtagEntities();
 				ArrayList<String> hashTags = new ArrayList<String>();
 				for (HashtagEntity hash : hashtagList) {hashTags.add(hash.getText()); }
-
 				if (counter < MAX_TWEETS) {
-					currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName()));
+					currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName(), status.getInReplyToStatusId()));
 					System.out.println("\n[+] Getting status:" + status.getText());
 					System.out.println("[+] Using these hashTag words: " + currentTweets.get(counter).getHashtags());
 					counter++;
@@ -237,17 +240,18 @@ public class TwitterActions {
 			twitterStream.cleanUp();
 			twitterStream.removeListener(trendListener);
 			System.out.println("\n[+] Resuming.");
-			postTweet(handleTweets());
+			postTweet(handleTweets(), statusId);
 		}
 	}
-	
+
 	//Generate a respones to users mentioning 32Pac.
+
 	private void respondToMention(HashtagEntity[] hashtagList, String tweet, String username, String toUsername) {
 		ArrayList<String> hashTags = new ArrayList<String>();
 		for (HashtagEntity hash : hashtagList) hashTags.add(hash.getText());
 
-		RhymeLine tweetText = getTweetText(new Tweet(tweet, hashTags, username));
-		if (tweetText != null) postTweet(tweetText.toString()+"\n@" + toUsername);
+		RhymeLine tweetText = getTweetText(new Tweet(tweet, hashTags, username, 0));
+		if (tweetText != null) postTweet(tweetText.toString()+"\n@" + toUsername, statusId);
 		else {System.out.println("[-] Could not rhyme with that tweet :(");}
 	}
 
@@ -266,7 +270,7 @@ public class TwitterActions {
 		}
 		return out;
 	}
-	
+
 	//Iterates through all obtained tweets and picks the best rhyme from them.
 	public String handleTweets(){
 		System.out.println("[+] Generating tweets, please wait ... ");
@@ -278,6 +282,7 @@ public class TwitterActions {
 			if (currentRhymeLine == null) continue;
 			currentScore = currentRhymeLine.getScore();
 			if (currentScore > bestScore){
+				statusId = tweet.getStatusId();
 				bestRhymeLine = currentRhymeLine;
 				bestScore = currentScore;
 				username = tweet.getUserName();
@@ -293,12 +298,19 @@ public class TwitterActions {
 		lc.chooseLyrics();
 		return lc.selectBest();
 	}
-	
+
 	//Post the generated text to Twitter.
-	public void postTweet(String text){
+	public void postTweet(String text, Long inReplyToStatusId) {
 		try{
 			System.out.println("\n[*] Posting " + text);
-			//twitter.updateStatus(text);
+			if (statusId != 0){
+				StatusUpdate stat = new StatusUpdate(text);
+				stat.setInReplyToStatusId(inReplyToStatusId);
+				twitter.updateStatus(stat);
+			}
+			else {
+				twitter.updateStatus(text);
+			}
 			System.out.println("[+]Tweet Successful: '" + text + "'");
 		} catch(Exception e) { System.out.println("Tweet Error!!!!!!!");}
 	}
