@@ -24,6 +24,6 @@ public class Tweet {
     public ArrayList<String> getHashtags() { return hashTags; }
     
     public String toString() {
-        return text + "\nRhymeword: " + rhymeWord + "\n userName: " + userName;
+        return text + "\nRhymeword: " + rhymeWord + "\nuserName: " + userName;
     }
 }
