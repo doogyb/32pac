@@ -5,11 +5,7 @@ import org.jsoup.select.Elements;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -143,8 +139,9 @@ public class NaturalLanguage {
         return out;
     }
     
-     public static String[] splitHashtag(String input) {
-        return input.split("(?=[A-Z])");
+     public static List splitHashtag(String input) {
+         List<String> tags = new ArrayList<String> (Arrays.asList(input.split("(?=[A-Z])")));
+         for (int i = 0; i < tags.size(); i++) if (tags.get(i).length() <= 2) tags.remove(i--);
+         return  tags;
     }
-
 }
