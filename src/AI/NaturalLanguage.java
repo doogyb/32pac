@@ -32,6 +32,7 @@ public class NaturalLanguage {
     }
 
     public static String getLastTweetWord(String input) {
+        input = input.substring(0, input.indexOf("#"));     //so we take the last word after #
         String inputArray[] = input.split(" ");
         int i;
 
