@@ -52,6 +52,7 @@ public class LyricsDB {
         System.out.println("\n[+] Downloading finished.");
     }
 
+    //this methid takes in a url and downloads it's content into fileName
     private boolean download(String url, String fileName) {
         Elements element = getHtmlElement(url, "pre");
 
@@ -67,6 +68,7 @@ public class LyricsDB {
         } return false;
     }
 
+    //method to check if the user has any lyrics files
     public static boolean haveLyrics() {
         File lyricsFile = new File("lyrics/");
         return ( (lyricsFile.exists()) && ((lyricsFile.list().length) > 0) );
