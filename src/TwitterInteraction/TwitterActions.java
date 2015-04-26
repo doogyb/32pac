@@ -39,7 +39,7 @@ public class TwitterActions {
 	 * Created by Fergus on 08/04/15.
 	 */
 
-	public  static final int MAX_TWEETS = 10;
+	public static final int MAX_TWEETS = 5;
 
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
 	private static String ourUserNameMention = "@32_Pac";
@@ -210,6 +210,7 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList) {hashTags.add(hash.getText()); }
 				if (counter < MAX_TWEETS) {
 					currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName(), status.getInReplyToStatusId()));
+					System.out.println("ID HERE:" + status.getInReplyToStatusId());
 					System.out.println("\n[+] Getting status:" + status.getText());
 					System.out.println("[+] Using these hashTag words: " + currentTweets.get(counter).getHashtags());
 					counter++;
@@ -249,9 +250,11 @@ public class TwitterActions {
 	private void respondToMention(HashtagEntity[] hashtagList, String tweet, String username, String toUsername) {
 		ArrayList<String> hashTags = new ArrayList<String>();
 		for (HashtagEntity hash : hashtagList) hashTags.add(hash.getText());
-
-		RhymeLine tweetText = getTweetText(new Tweet(tweet, hashTags, username, 0));
-		if (tweetText != null) postTweet(tweetText.toString()+"\n@" + toUsername, statusId);
+		RhymeLine tweetText = getTweetText(new Tweet(tweet, hashTags, username, statusId));
+		if (tweetText != null) {
+			//System.out.println("aaaa");
+			postTweet(tweetText.toString()+"\n@" + toUsername, statusId);
+		}
 		else {System.out.println("[-] Could not rhyme with that tweet :(");}
 	}
 
@@ -304,12 +307,13 @@ public class TwitterActions {
 		try{
 			System.out.println("\n[*] Posting " + text);
 			if (statusId != 0){
+				System.out.println("id: " + inReplyToStatusId);
 				StatusUpdate stat = new StatusUpdate(text);
 				stat.setInReplyToStatusId(inReplyToStatusId);
-				twitter.updateStatus(stat);
+				//twitter.updateStatus(stat);
 			}
 			else {
-				twitter.updateStatus(text);
+				//twitter.updateStatus(text);
 			}
 			System.out.println("[+]Tweet Successful: '" + text + "'");
 		} catch(Exception e) { System.out.println("Tweet Error!!!!!!!");}

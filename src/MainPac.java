@@ -39,7 +39,7 @@ public class MainPac {
         }
         TwitterActions TA = new TwitterActions();
         TA.authorization();
-        TA.listener();
+        //TA.listener();
         TA.trendTweetListener();
 
     }
