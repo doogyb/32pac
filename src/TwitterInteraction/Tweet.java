@@ -1,8 +1,6 @@
 package TwitterInteraction;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
 import AI.NaturalLanguage;
 
 /**
@@ -16,10 +14,7 @@ public class Tweet {
         this.text = text;
         rhymeWord = NaturalLanguage.getLastTweetWord(text);
         this.userName = userName;
-        for (String hashTag : inputHashTags) {
-            // this.hashTags.addAll(NaturalLanguage.splitString(hashTag));
-            this.hashTags.addAll(Arrays.asList(NaturalLanguage.splitHashtag(hashTag)));
-        }
+        for (String hashTag : inputHashTags) this.hashTags.addAll(NaturalLanguage.splitHashtag(hashTag));
     }
 
     public String getRhymeWord() {return rhymeWord;}
@@ -28,8 +23,6 @@ public class Tweet {
     
     public ArrayList<String> getHashtags() { return hashTags; }
     
-    public boolean hasHashtags(){ return !(hashTags == null); }
-
     public String toString() {
         return text + "\n\nRhymeword: " + rhymeWord + "\n\n userName: " + userName;
     }
