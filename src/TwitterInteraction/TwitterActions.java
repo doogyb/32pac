@@ -1,4 +1,5 @@
 package TwitterInteraction;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -15,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
-import twitter4j.ResponseList;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
@@ -61,6 +61,7 @@ public class TwitterActions {
 				username = tweet.getUserName();
 			}
 		}
+		currentTweets.clear();
 		if (bestRhymeLine == null) return null;
 		return NaturalLanguage.filter(bestRhymeLine.toString()) + "\n@" + username;
 	}
@@ -93,13 +94,6 @@ public class TwitterActions {
 		}
 		catch(Exception e){
 			System.out.println("Tweet Error!!!!!!!");
-		}
-	}
-
-	public void getTimeLine() throws TwitterException{
-		ResponseList<Status> list = twitter.getHomeTimeline();
-		for(Status each: list){
-			System.out.println("Sent By: @" + each.getUser().getScreenName() + " - " + " " + each.getUser().getName() + "\n" + each.getText() + "\n");
 		}
 	}
 
@@ -202,7 +196,6 @@ public class TwitterActions {
 					if (tweetText != null) postTweet(tweetText.toString() + "\n@" + status.getUser().getScreenName());
 					else {System.out.println("[-] Could not rhyme with that tweet :(");}
 
-
 					//String tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName())).toString();
 					//postTweet(tweetText + "\n@" + status.getUser().getScreenName());
 				}
@@ -255,7 +248,7 @@ public class TwitterActions {
 	}
 
 	public void trendTweetListener(){
-		StatusListener listener = new StatusListener() {
+		StatusListener trendListener = new StatusListener() {
 			int counter = 0;
 			@Override
 			public void onException(Exception arg0) {}
@@ -274,10 +267,12 @@ public class TwitterActions {
 					currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
 					System.out.println("\n[+] GETTING STATUS:" + status.getText());
 					counter++;
+					
 				}
 				else {
 					System.out.println("\n [+] Quitting listener.");
-					twitterStream.shutdown();
+					counter = 0;
+					while (true){}
 				}
 			}
 			@Override
@@ -288,16 +283,18 @@ public class TwitterActions {
 		while (true){
 			FilterQuery fq = new FilterQuery();
 			fq.track(getTrends());
-			twitterStream.addListener(listener);
+			twitterStream.addListener(trendListener);
 			twitterStream.filter(fq);
 			try {
 				TimeUnit.SECONDS.sleep(10);
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
+			twitterStream.shutdown();
+			twitterStream.cleanUp();
+			twitterStream.removeListener(trendListener);
 			System.out.println("Resuming.");
 			postTweet(handleTweets());
-			twitterStream.removeListener(listener);
 		}
 	}
 

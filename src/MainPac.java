@@ -1,9 +1,6 @@
-import AI.NaturalLanguage;
 import DataManagement.LyricsDB;
 import TwitterInteraction.TwitterActions;
-
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -15,13 +12,19 @@ public class MainPac {
     private static final String dbURL = "http://ohhla.com/favorite.html";
 
     private static boolean updateLyrics() {
-        System.out.println("Do you want to update your lyrics database ? (y/n) ");
+        System.out.println("Do you wish to update your lyrics database ? (y/n) ");
         while (true) {
             try {
                 BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
                 String input = br.readLine();
-                if (input.equals("y") || input.equals("yes")) return true;
-                else if (input.equals("n" )|| input.equals("no")) return false;
+                if (input.equals("y") || input.equals("yes")){
+                	br.close();
+                	return true;
+                }
+                else if (input.equals("n" )|| input.equals("no")){
+                	br.close();
+                	return false;
+                }
                 else System.out.println("[-] Incorrect input, please enter y/n");
             } catch (IOException e ) {System.out.println("[-] Incorrect input.");return false;}
         }
@@ -37,6 +40,5 @@ public class MainPac {
         TA.authorization();
         TA.listener();
         TA.trendTweetListener();
-
     }
 }

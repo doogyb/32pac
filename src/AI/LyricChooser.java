@@ -24,7 +24,15 @@ public class LyricChooser {
         this.tweet = tweet;
         this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
         System.out.println("[++] rhyming with " + tweet.getRhymeWord());
-        System.out.println("[++] Hashtag is " + tweet.getHashtags());
+        if (tweet.hasHashtags()){
+        	System.out.println("[++] Hashtags are:");
+        	Iterator<String[]> itr = tweet.getHashtags().iterator();
+        	while (itr.hasNext()){
+        		for (String word : itr.next()){
+        			System.out.print(" " + word);
+        		}
+        	}
+        }
     }
 
     public void chooseLyrics() {
