@@ -1,8 +1,11 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import AI.NaturalLanguage;
 import DataManagement.LyricsDB;
 import TwitterInteraction.TwitterActions;
+
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * Created by doogy on 17/04/15.
@@ -25,8 +28,8 @@ public class MainPac {
     }
 
     public static void main (String[] args) throws IOException {
-        if (updateLyrics() || !LyricsDB.haveLyrics()) {
-            System.out.println("[+] Checking for updates ... ");
+        if (!LyricsDB.haveLyrics() || updateLyrics()) {
+            System.out.println("[+] Looking for lyrics files ... ");
             LyricsDB db = new LyricsDB(dbURL);
             db.downloadSongs();
         }
