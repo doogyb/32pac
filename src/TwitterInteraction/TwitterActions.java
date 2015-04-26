@@ -207,11 +207,11 @@ public class TwitterActions {
 
 				if (counter < MAX_TWEETS) {
 					currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName()));
-					System.out.println("[+] GETTING STATUS:" + status.getText());
+					System.out.println("\n[+] Getting status:" + status.getText());
 					System.out.println("[+] Using these hashTag words: " + currentTweets.get(counter).getHashtags());
 					counter++;
 				} else {
-					System.out.println("\n [+] Quitting listener.");
+					System.out.println("\n[+] Quitting listener.");
 					counter = 0;
 					try {
 						TimeUnit.HOURS.sleep(25);
@@ -237,7 +237,7 @@ public class TwitterActions {
 			twitterStream.cleanUp();
 			twitterStream.removeListener(trendListener);
 			System.out.println("\n[+] Resuming.");
-			handleTweets();
+			postTweet(handleTweets());
 		}
 	}
 	
