@@ -34,43 +34,43 @@ public class LyricChooser {
         String[] words;
 
         for (File song : songs) {
-            try { br = new BufferedReader(new FileReader(song)); }
-            catch (IOException e) { e.printStackTrace(); }
-
-            if (song.length()<500) continue; // ignore empty or nearly empty files
-
             try {
-                line1=br.readLine();
-                line2=br.readLine();
-            } catch (IOException e) { e.printStackTrace(); }
+                br = new BufferedReader(new FileReader(song));
+                if (song.length() < 500) continue; // ignore empty or nearly empty files
 
-            while(true) {
                 try {
+                    line1 = br.readLine();
+                    line2 = br.readLine();
+                } catch (IOException e) {e.printStackTrace();}
 
-                    line1=line2;
+                while (true) {
+                    try {
+                        line1 = line2;
 
-                    if ((line2 = br.readLine()) == null) break;
+                        if ((line2 = br.readLine()) == null) break;
 
-                    if ( line1.length()<MIN_LINE_LENGTH || line2.length()<MIN_LINE_LENGTH) continue;
-                    if (line1.contains("[") || line2.contains("[")) continue;
-                    if (NaturalLanguage.getLastWord(line1) == null ||
-                            NaturalLanguage.getLastWord(line2)==null) continue;
-                    if ( (line1+line2).length() > ( MAX_TWEET_LENGTH + tweet.getUserName().length() + 1))
-                        continue; // rhyme is too long to be tweeted
+                        if (line1.length() < MIN_LINE_LENGTH || line2.length() < MIN_LINE_LENGTH) continue;
+                        if (line1.contains("[") || line2.contains("[")) continue;
+                        if (NaturalLanguage.getLastWord(line1) == null ||
+                                NaturalLanguage.getLastWord(line2) == null) continue;
+                        if ((line1 + line2).length() > (MAX_TWEET_LENGTH + tweet.getUserName().length() + 1))
+                            continue; // rhyme is too long to be tweeted
 
-                    lastWord1=NaturalLanguage.getLastWord(line1);
-                    lastWord2=NaturalLanguage.getLastWord(line2);
+                        lastWord1 = NaturalLanguage.getLastWord(line1);
+                        lastWord2 = NaturalLanguage.getLastWord(line2);
 
-                    for (Integer key : rhymeList.keySet()) {
-                        if ( rhymeList.get(key).contains(lastWord1) && rhymeList.get(key).contains(lastWord2) ) {
-                            rhymeLines.add(new RhymeLine(line1, line2, key));
-                            break;
+                        for (Integer key : rhymeList.keySet()) {
+                            if (rhymeList.get(key).contains(lastWord1) && rhymeList.get(key).contains(lastWord2)) {
+                                rhymeLines.add(new RhymeLine(line1, line2, key));
+                                break;
+                            }
                         }
-                    }
-
-                } catch (IOException e) { e.printStackTrace(); }
+                    } catch (IOException e) {e.printStackTrace();}
+                }
+            } catch (IOException e) { e.printStackTrace(); } finally {
+                try {if (br != null)br.close();}
+                catch (IOException ex) {ex.printStackTrace();}
             }
-
         }
     }
 
@@ -82,6 +82,7 @@ public class LyricChooser {
             String line1Comp = line.line1.toLowerCase();
             String line2Comp = line.line2.toLowerCase(); // for proper comparisons.
             String fullRhyme = line1Comp + "\n" + line2Comp;
+
             //check if last word and rhyme word have the same number of sels
             if (NaturalLanguage.numberOfSyllables(tweet.getRhymeWord())==line.syllables) line.score+=10;
 
@@ -90,6 +91,7 @@ public class LyricChooser {
             if (line2Comp.contains(tweet.getRhymeWord().toLowerCase())) line.score += 10;
 
             //checks if it contains you
+            if (line1Comp.contains("you") || line1Comp.contains("your") || line1Comp.contains("you're")) line.score += 10;
             if (line2Comp.contains("you") || line2Comp.contains("your") || line2Comp.contains("you're")) line.score += 10;
 
             //checks if it contains a question
@@ -98,8 +100,9 @@ public class LyricChooser {
 
             if (tweet.getHashtags().size()>0) {
                 for (String hashTag : tweet.getHashtags()) {
-                    if (fullRhyme.contains(hashTag.toLowerCase()))
-                        line.score += 10;
+                    if (fullRhyme.contains(hashTag.toLowerCase())) {
+                        line.score += 15;
+                    }
                 }
             }
 
