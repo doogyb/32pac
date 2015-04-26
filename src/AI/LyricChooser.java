@@ -36,7 +36,6 @@ public class LyricChooser {
                 if (song.length() < 500) continue; // ignore empty or nearly empty files
 
                 try {
-                    line1 = br.readLine();
                     line2 = br.readLine();
                 } catch (IOException e) {e.printStackTrace();}
 
