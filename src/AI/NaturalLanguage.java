@@ -63,8 +63,7 @@ public class NaturalLanguage {
                 rhymes.get(2).addAll(Arrays.asList(element.get(3).select("a").text().split(" ")));
                 rhymes.get(3).addAll(Arrays.asList(element.get(5).select("a").text().split(" ")));
             } catch (IndexOutOfBoundsException e) {}
-        }
-        catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
+        } catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
         return rhymes;
     }
 
@@ -84,13 +83,12 @@ public class NaturalLanguage {
                 new byte[]{83, 42, 42, 116}, new byte[]{115, 42, 42, 116},
                 new byte[]{68, 42, 99, 107}, new byte[]{100, 42, 99, 107}
         };
+
         for (int i = 0; i < 12; i++){
             String x = new String(words[i]);
-            if (rhyme.contains(x)){
-                rhyme = rhyme.replace(x, new String(filter[i]));
-            }
-        }
-        return rhyme;
+            if (rhyme.contains(x)) rhyme = rhyme.replace(x, new String(filter[i]));
+
+        } return rhyme;
     }
 
     public static List splitHashtag(String input) {
