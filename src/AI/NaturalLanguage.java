@@ -43,7 +43,8 @@ public class NaturalLanguage {
             inputArray[i] = inputArray[i].substring(0, end+1);
             Pattern wordPattern = Pattern.compile("[^a-z0-9]", Pattern.CASE_INSENSITIVE);
 
-            if (!wordPattern.matcher(inputArray[i]).find() && !inputArray[i].equals("http")) break;
+            if (inputArray[i].equals("http")) continue;
+            if (!wordPattern.matcher(inputArray[i]).find()) break;
         } return inputArray[i];
     }
 
