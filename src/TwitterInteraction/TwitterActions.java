@@ -212,9 +212,6 @@ public class TwitterActions {
 			public void onUserProfileUpdate(User arg0) {}
 
 			@Override
-			public void onUserSuspension(long l) {}
-
-			@Override
 			public void onUserListUpdate(User arg0, UserList arg1) {}
 			@Override
 			public void onUserListUnsubscription(User arg0, User arg1, UserList arg2) {}
@@ -246,8 +243,6 @@ public class TwitterActions {
 			public void onStallWarning(StallWarning arg0) {}
 			@Override
 			public void onUnfollow(User arg0, User arg1) {}
-			@Override
-			public void onUserDeletion(long arg0) {}
 		};
 		twitterStream.addListener(userStreamListener);
 		twitterStream.user();
