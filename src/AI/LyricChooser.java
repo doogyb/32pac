@@ -22,7 +22,7 @@ public class LyricChooser {
     public LyricChooser(Tweet tweet) {
         this.tweet = tweet;
         this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
-        System.out.println("[++] rhyming with " + tweet.toString());
+        System.out.println("\n[++] Rhyming with " + tweet.toString());
     }
 
     private static boolean skip(String line1, String line2, int offset) {
