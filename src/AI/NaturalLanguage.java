@@ -84,64 +84,35 @@ public class NaturalLanguage {
         catch (IOException e) {System.err.println("Caught IOException: " + e.getMessage());}
         return rhymes;
     }
-    
+
     public static String filter(String rhyme){
-		byte[][] words = {new byte[]{78, 105, 103, 103, 101, 114}, new byte[]{110, 105, 103, 103, 101, 114},
-						  new byte[]{78, 105, 103, 103, 97}, new byte[]{110, 105, 103, 103, 97},
-						  new byte[]{80, 117, 115, 115, 121}, new byte[]{112, 117, 115, 115, 121},
-						  new byte[]{70, 117, 99, 107}, new byte[]{102, 117, 99, 107},
-						  new byte[]{83, 104, 105, 116}, new byte[]{115, 104, 105, 116},
-						  new byte[]{68, 105, 99, 107}, new byte[]{100, 105, 99, 107}
-		};
+        byte[][] words = {new byte[]{78, 105, 103, 103, 101, 114}, new byte[]{110, 105, 103, 103, 101, 114},
+                new byte[]{78, 105, 103, 103, 97}, new byte[]{110, 105, 103, 103, 97},
+                new byte[]{80, 117, 115, 115, 121}, new byte[]{112, 117, 115, 115, 121},
+                new byte[]{70, 117, 99, 107}, new byte[]{102, 117, 99, 107},
+                new byte[]{83, 104, 105, 116}, new byte[]{115, 104, 105, 116},
+                new byte[]{68, 105, 99, 107}, new byte[]{100, 105, 99, 107}
+        };
 
-		byte[][] filter = {new byte[]{78, 105, 42, 42, 101, 114}, new byte[]{110, 105, 42, 42, 101, 114},
-						   new byte[]{78, 105, 42, 42, 97}, new byte[]{110, 105, 42, 42, 97},
-						   new byte[]{80, 117, 42, 42, 121}, new byte[]{112, 117, 42, 42, 121},
-						   new byte[]{70, 42, 42, 107}, new byte[]{102, 42, 42, 107},
-						   new byte[]{83, 42, 42, 116}, new byte[]{115, 42, 42, 116},
-						   new byte[]{68, 42, 99, 107}, new byte[]{100, 42, 99, 107}
-		};
-		for (int i = 0; i < 12; i++){
-			String x = new String(words[i]);
-			if (rhyme.contains(x)){
-				rhyme = rhyme.replace(x, new String(filter[i]));
-			}
-		}
-		return rhyme;
-    }
-
-    public static ArrayList<String> splitString(String input) {
-        ArrayList<String> out = new ArrayList<String>();
-        int pos = 0, matched = 0;
-        String match = "";
-		input = input.toLowerCase();
-        if (input.length() < 3) return null;
-        if (dict.contains(input)) return null;
-        while (input.length() != 0){
-            for (int i = 1; i <= input.length(); i++) {
-                String split = input.substring(0, i);
-                if (dict.contains(split)) {
-                    match = split;
-                    pos = i;
-                    matched = 1;
-                }
-            }
-            if (matched == 1) {
-                input = input.substring(pos);
-                matched = 0;
-                //System.out.println(match); //testing
-                out.add(match.toLowerCase());
-            }
-            else {
-                input = input.substring(1);
+        byte[][] filter = {new byte[]{78, 105, 42, 42, 101, 114}, new byte[]{110, 105, 42, 42, 101, 114},
+                new byte[]{78, 105, 42, 42, 97}, new byte[]{110, 105, 42, 42, 97},
+                new byte[]{80, 117, 42, 42, 121}, new byte[]{112, 117, 42, 42, 121},
+                new byte[]{70, 42, 42, 107}, new byte[]{102, 42, 42, 107},
+                new byte[]{83, 42, 42, 116}, new byte[]{115, 42, 42, 116},
+                new byte[]{68, 42, 99, 107}, new byte[]{100, 42, 99, 107}
+        };
+        for (int i = 0; i < 12; i++){
+            String x = new String(words[i]);
+            if (rhyme.contains(x)){
+                rhyme = rhyme.replace(x, new String(filter[i]));
             }
         }
-        return out;
+        return rhyme;
     }
     
-     public static List splitHashtag(String input) {
-         List<String> tags = new ArrayList<String> (Arrays.asList(input.split("(?=[A-Z])")));
-         for (int i = 0; i < tags.size(); i++) if (tags.get(i).length() <= 2) tags.remove(i--);
-         return  tags;
+    public static List splitHashtag(String input) {
+        List<String> tags = new ArrayList<String> (Arrays.asList(input.split("(?=[A-Z])")));
+        for (int i = 0; i < tags.size(); i++) if (tags.get(i).length() <= 2) tags.remove(i--);
+        return  tags;
     }
 }
