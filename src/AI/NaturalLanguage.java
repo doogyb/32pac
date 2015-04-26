@@ -2,6 +2,7 @@ package AI;
 
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -10,6 +11,7 @@ import java.util.regex.Pattern;
  * Created by samuel on 16/04/15.
  */
 public class NaturalLanguage {
+	//Obtain the last word from the tweet.
     public static String getLastTweetWord(String input) {
         input = input.substring(0, input.indexOf("#"));     //so we take the last word after #
         String inputArray[] = input.split(" ");
@@ -27,6 +29,7 @@ public class NaturalLanguage {
         } return inputArray[i];
     }
 
+    //Count the number of syllables in the text.
     public static int numberOfSyllables(String input) {
         int syllablesCount = 0;
         char[] word = input.toCharArray();
@@ -67,6 +70,7 @@ public class NaturalLanguage {
         return rhymes;
     }
 
+    //Censor offensive words.
     public static String filter(String rhyme){
         byte[][] words = {new byte[]{78, 105, 103, 103, 101, 114}, new byte[]{110, 105, 103, 103, 101, 114},
                 new byte[]{78, 105, 103, 103, 97}, new byte[]{110, 105, 103, 103, 97},
@@ -91,9 +95,10 @@ public class NaturalLanguage {
         } return rhyme;
     }
 
-    public static List splitHashtag(String input) {
+    //Split hashtags into words on capital letters.
+    public static List<String> splitHashtag(String input){
         List<String> tags = new ArrayList<String> (Arrays.asList(input.split("(?=[A-Z])")));
         for (int i = 0; i < tags.size(); i++) if (tags.get(i).length() <= 2) tags.remove(i--);
-        return  tags;
+        return tags;
     }
 }

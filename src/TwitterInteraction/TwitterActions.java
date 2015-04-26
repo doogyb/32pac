@@ -44,7 +44,8 @@ public class TwitterActions {
 	private static Twitter twitter = new TwitterFactory().getInstance();
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
-
+	
+	//Sets the keys and tokens.
 	public void authorization() {
 		readKeys();
 		readTokens();
@@ -57,6 +58,7 @@ public class TwitterActions {
 		} catch (Exception e) { System.out.println("Authorization failed!!!"); }
 	}
 
+	//Obtain a new set of tokens.
 	public void getTokens() throws TwitterException, IOException {	//keys must be set before calling this
 		String filename = "tokens.txt";
 		twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
@@ -86,6 +88,7 @@ public class TwitterActions {
 		} catch (IOException e) { System.out.println("Error while saving file:" + e.getMessage()); }
 	}
 
+	//Read the keys from a file.
 	public void readKeys() {
 		String keys = "keys.txt", secret[] = new String[2];
 		try{
@@ -102,6 +105,7 @@ public class TwitterActions {
 		CONSUMER_KEY_SECRET = secret[1];
 	}
 
+	//read the tokens from a file.
 	public void readTokens() {
 		String tokens = "tokens.txt", secret[] = new String[2];
 		try{
@@ -118,6 +122,7 @@ public class TwitterActions {
 		accessTokenSecret = secret[1];
 	}
 
+	//Listen to tweets directed at our bot.
 	public void listener(){
 		final UserStreamListener userStreamListener = new UserStreamListener() {
 			@Override
@@ -184,6 +189,7 @@ public class TwitterActions {
 		twitterStream.user();
 	}
 
+	//Listen to tweets containing trending hashtags.
 	public void trendTweetListener(){
 		StatusListener trendListener = new StatusListener() {
 			int counter = 0;
@@ -207,7 +213,11 @@ public class TwitterActions {
 				} else {
 					System.out.println("\n [+] Quitting listener.");
 					counter = 0;
-					while (true){}
+					try {
+						TimeUnit.HOURS.sleep(25);
+					} catch(InterruptedException ex) {
+						Thread.currentThread().interrupt();
+					}
 				}
 			}
 			@Override
@@ -230,7 +240,8 @@ public class TwitterActions {
 			handleTweets();
 		}
 	}
-
+	
+	//Generate a respones to users mentioning 32Pac.
 	private void respondToMention(HashtagEntity[] hashtagList, String tweet, String username, String toUsername) {
 		ArrayList<String> hashTags = new ArrayList<String>();
 		for (HashtagEntity hash : hashtagList) hashTags.add(hash.getText());
@@ -240,6 +251,7 @@ public class TwitterActions {
 		else {System.out.println("[-] Could not rhyme with that tweet :(");}
 	}
 
+	//Obtain trending hashtags.
 	public String[] getTrends(){
 		Trends trends = null;
 		String[] out = new String[3];
@@ -254,7 +266,8 @@ public class TwitterActions {
 		}
 		return out;
 	}
-
+	
+	//Iterates through all obtained tweets and picks the best rhyme from them.
 	public String handleTweets(){
 		System.out.println("[+] Generating tweets, please wait ... ");
 		int bestScore = 0, currentScore = 0;
@@ -280,7 +293,8 @@ public class TwitterActions {
 		lc.chooseLyrics();
 		return lc.selectBest();
 	}
-
+	
+	//Post the generated text to Twitter.
 	public void postTweet(String text){
 		try{
 			System.out.println("\n[*] Posting " + text);

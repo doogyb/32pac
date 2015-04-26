@@ -68,6 +68,7 @@ public class LyricChooser {
         }
     }
 
+    //Assign scores to lines and choose the best rhyme.
     public RhymeLine selectBest() {
         if (rhymeLines.size() == 0) return null;
         int maxScore = 0;
@@ -78,7 +79,7 @@ public class LyricChooser {
             String fullRhyme = line1Comp + "\n" + line2Comp;
 
             //check if last word and rhyme word have the same number of sels
-            if (NaturalLanguage.numberOfSyllables(tweet.getRhymeWord())==line.syllables) line.score+=10;
+            if (NaturalLanguage.numberOfSyllables(tweet.getRhymeWord()) == line.syllables) line.score += 10;
 
             //check if last word is contained in line
             if (line1Comp.contains(tweet.getRhymeWord().toLowerCase())) line.score += 10;
@@ -92,13 +93,13 @@ public class LyricChooser {
             if (line1Comp.contains("?")) line.score += 10;
             if (line2Comp.contains("?")) line.score += 10;
 
-            if (tweet.getHashtags().size()>0) {
+            if (tweet.getHashtags().size() > 0) {
                 for (String hashTag : tweet.getHashtags()) {
                     if (fullRhyme.contains(hashTag.toLowerCase())) line.score += 15;
                 }
             }
 
-            if (line.score>maxScore) {
+            if (line.score > maxScore) {
                 bestLine=line;
                 maxScore=line.score;
             }

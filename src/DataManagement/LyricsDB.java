@@ -26,6 +26,7 @@ public class LyricsDB {
         } return element;
     }
 
+    //Download lyric files.
     public void downloadSongs() {
         if (!(new File("lyrics").exists())) new File("lyrics").mkdir();
         Elements top50Artists = getHtmlElement(url, "table td a[href]");

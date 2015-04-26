@@ -1,12 +1,8 @@
-import AI.NaturalLanguage;
 import DataManagement.LyricsDB;
-import TwitterInteraction.Tweet;
 import TwitterInteraction.TwitterActions;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by doogy on 17/04/15.
@@ -15,6 +11,7 @@ import java.util.Arrays;
 public class MainPac {
     private static final String dbURL = "http://ohhla.com/favorite.html";
 
+  //Download new lyrics.
     private static boolean updateLyrics() {
         System.out.println("Do you wish to update your lyrics database ? (y/n) ");
         while (true) {
