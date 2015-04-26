@@ -10,38 +10,50 @@ import java.io.*;
  */
 
 public class LyricsDB {
-    private static final String dbURL = "http://ohhla.com/favorite.html";
     private String url;
+    private static final int MAX_ATTEMPTS = 25;
 
-    private LyricsDB(String inputURL) {
+    public LyricsDB(String inputURL) {
         url = inputURL;
     }
 
     private Elements getHtmlElement(String url ,String element_name) {
         Elements element = null;
-        try {element = Jsoup.connect(url).get().select(element_name);}
-        catch (IOException e) {return null;}
-        return element;
+
+        for (int i = 0; i < MAX_ATTEMPTS; i++) {
+            try {element = Jsoup.connect(url).get().select(element_name);
+                if (i>0) System.out.println("Attempt number " +i);
+            }
+            catch (IOException e) {continue;}
+            break;
+        } return element;
     }
 
-    private void downloadSongs() {
+    public void downloadSongs() {
         if (!(new File("lyrics").exists())) new File("lyrics").mkdir();
         Elements top50Artists = getHtmlElement(url, "table td a[href]");
         for (Element artist : top50Artists) {
             String artistName = artist.text();
             System.out.println("\n[+] Downloading songs by " + artistName);
-            Elements songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]");
+            Elements songs;
+
+            if ((songs = getHtmlElement(artist.attr("abs:href"), "table table td a[href]"))==null) {
+                System.out.println("[-] Skipping songs by " + artist);
+                continue;
+            }
+
             for (Element song : songs) {
                 String songURL = song.attr("abs:href");
                 String songFileName = "lyrics/" + song.text().replace("/","") + ".txt";
                 if (!(new File(songFileName).exists())) {
                     System.out.println("\t[+] Downloading " + songURL);
                     download(songURL, songFileName);
-                    try {Thread.sleep(500);}
-                    catch (InterruptedException e) {System.err.println("Caught IOException: " + e.getMessage());}
+                    //try {Thread.sleep(500);}
+                    //catch (InterruptedException e) {System.err.println("Caught IOException: " + e.getMessage());}
                 }
             }
         }
+        System.out.println("\n[+] Downloading finished.");
     }
 
     private boolean download(String url, String fileName) {
@@ -61,15 +73,7 @@ public class LyricsDB {
         } return false;
     }
 
-    private boolean haveLyrics() {
+    public static boolean haveLyrics() {
         return ((new File("lyrics/").list().length) > 0);
-    }
-
-    public static void main(String[] args) {
-        LyricsDB db = new LyricsDB(dbURL);
-        db.downloadSongs();
-        //db.download("http://ohhla.com/anonymous/treysong/ladies2/gonetill.tre.txt", "test2.txt");
-        //System.out.println(db.haveLyrics());
-
     }
 }

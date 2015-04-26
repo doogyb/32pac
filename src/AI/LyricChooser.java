@@ -1,13 +1,12 @@
 package AI;
 
-import TwitterInteraction.Tweet;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import TwitterInteraction.Tweet;
 
 /**
  * Created by samuel on 08/04/15.
@@ -16,19 +15,16 @@ import java.util.HashMap;
 public class LyricChooser {
 
     public static final int MIN_LINE_LENGTH = 5;
+    public static final int MAX_TWEET_LENGTH = 140;
 
     private Tweet tweet;
-    protected ArrayList<RhymeLine> rhymeLines = new ArrayList<RhymeLine>();
-    protected HashMap<String,ArrayList<String>> rhymeList = new HashMap<String, ArrayList<String>>();
+    public ArrayList<RhymeLine> rhymeLines = new ArrayList<RhymeLine>();
+    protected HashMap<Integer,ArrayList<String>> rhymeList = new HashMap<Integer, ArrayList<String>>();
 
     public LyricChooser(Tweet tweet) {
         this.tweet = tweet;
-        this.rhymeList = new RhymeGenerator().getRhymes(tweet.getRhymeWord());
+        this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
     }
-
-
-
-
 
     public void chooseLyrics() {
         File[] songs = new File("lyrics").listFiles();
@@ -46,11 +42,6 @@ public class LyricChooser {
             //System.out.println(song.getAbsolutePath());
 
             try {
-//                String line = br.readLine();
-//                artist = br.readLine().split(":\\s*")[1];
-//                album = br. readLine().split(":\\s*")[1];
-//                songName = br.readLine().split(":\\s*")[1];
-//                br.readLine(); // skipping last line (Typed by)
                 line1=br.readLine();
                 line2=br.readLine();
             } catch (IOException e) { e.printStackTrace(); }
@@ -66,15 +57,15 @@ public class LyricChooser {
                     if (line1.contains("[") || line2.contains("[")) continue;
                     if (NaturalLanguage.getLastWord(line1) == null ||
                             NaturalLanguage.getLastWord(line2)==null) continue;
-                    if ( (line1+line2).length() > 140 ) continue; // rhyme is too long to be tweeted
-
+                    if ( (line1+line2).length() > ( MAX_TWEET_LENGTH + tweet.getUserName().length() + 1))
+                        continue; // rhyme is too long to be tweeted
 
                     lastWord1=NaturalLanguage.getLastWord(line1);
                     lastWord2=NaturalLanguage.getLastWord(line2);
 
-                    for (String key : rhymeList.keySet()) {
+                    for (Integer key : rhymeList.keySet()) {
                         if ( rhymeList.get(key).contains(lastWord1) && rhymeList.get(key).contains(lastWord2) ) {
-                            rhymeLines.add( new RhymeLine(line1,line2,artist,album,songName,key));
+                            rhymeLines.add(new RhymeLine(line1, line2, key));
                             break;
                         }
                     }
@@ -84,12 +75,33 @@ public class LyricChooser {
 
         }
     }
-    public static void main (String[] args) {
-        Tweet tw = new Tweet("zaid");
-        LyricChooser lc = new LyricChooser(tw);
-//        lc.chooseLyrics();
-//        for (RhymeLine line : lc.rhymeLines)
-//            System.out.println(line.toString());
-    }
 
+    public RhymeLine selectBest() {
+        int maxScore = 0;
+        RhymeLine bestLine=null;
+        for (RhymeLine line : rhymeLines) {
+            String fullRhyme = line.line1+line.line2;
+            //check if last word and rhyme word have the same number of sels
+            if (NaturalLanguage.numberOfSyllables(tweet.getRhymeWord())==line.syllables) line.score+=10;
+
+            //check if last word is contained in line
+            if (line.line1.contains(tweet.getRhymeWord())) line.score += 10;
+            if (line.line2.contains(tweet.getRhymeWord())) line.score += 10;
+
+            //checks if it contains you
+            if (line.line2.contains("you") || line.line2.contains("your") || line.line2.contains("you're")) line.score += 10;
+
+            //checks if it contains a question
+            if (line.line1.contains("?")) line.score += 10;
+            if (line.line2.contains("?")) line.score += 10;
+
+            if (line.score>maxScore) {
+                bestLine=line;
+                maxScore=line.score;
+            }
+
+        }
+        bestLine.set_score(maxScore);
+        return bestLine;
+    }
 }

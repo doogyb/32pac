@@ -7,15 +7,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import twitter4j.DirectMessage;
+import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
-import twitter4j.ResponseList;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
+import twitter4j.StatusListener;
+import twitter4j.Trends;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -26,6 +29,9 @@ import twitter4j.UserList;
 import twitter4j.UserStreamListener;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
+import AI.LyricChooser;
+import AI.NaturalLanguage;
+import AI.RhymeLine;
 
 public class TwitterActions {
 	/**
@@ -33,11 +39,40 @@ public class TwitterActions {
 	 */
 
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
-	private Twitter twitter = new TwitterFactory().getInstance();
+	private static String ourUserNameMention = "@32_Pac";
+	private static Twitter twitter = new TwitterFactory().getInstance();
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
+	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
+
+	public String handleTweets(){
+		System.out.println("Called");
+		System.out.println("Contents of cw: " + currentTweets);
+		int bestScore = 0, currentScore = 0;
+		RhymeLine bestRhymeLine = null;
+		String username = null;
+		for (Tweet tweet : currentTweets) {
+			System.out.println("TWEET = " + getTweetText(tweet));
+			RhymeLine currentRhymeLine = getTweetText(tweet);
+			currentScore = currentRhymeLine.get_score();
+			if (currentScore > bestScore){
+				bestRhymeLine = currentRhymeLine;
+				bestScore = currentScore;
+				username = tweet.getUserName();
+			}
+		}
+		return NaturalLanguage.filter(bestRhymeLine.toString() + "\n@" + username);
+	}
+
+	public static RhymeLine getTweetText(Tweet tw) {
+		LyricChooser lc = new LyricChooser(tw);
+		lc.chooseLyrics();
+		return lc.selectBest();
+	}
 
 	public void authorization() {
-		try {        
+		readKeys();
+		readTokens();
+		try {
 			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			twitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			AccessToken oauthAccessToken = new AccessToken(accessToken, accessTokenSecret);
@@ -56,13 +91,6 @@ public class TwitterActions {
 		catch(Exception e){
 			System.out.println("Tweet Error!!!!!!!");
 		}
-	}
-
-	public void getTimeLine() throws TwitterException{
-		ResponseList<Status> list = twitter.getHomeTimeline();
-		for(Status each: list){
-			System.out.println("Sent By: @" + each.getUser().getScreenName() + " - " + " " + each.getUser().getName() + "\n" + each.getText() + "\n");
-		}   
 	}
 
 	public void getTokens() throws TwitterException, IOException {	//keys must be set before calling this
@@ -133,26 +161,34 @@ public class TwitterActions {
 	}
 
 	public void listener(){
-		UserStreamListener userStreamListener = new UserStreamListener() {
+		final UserStreamListener userStreamListener = new UserStreamListener() {
 			@Override
 			public void onDirectMessage(DirectMessage message) {
+				System.out.println("Replying to direct message");
 				HashtagEntity[] hashtagList = message.getHashtagEntities();
-				String username = message.getSender().getScreenName(), text = message.getText(), lastword = text.substring(text.lastIndexOf(" ") + 1);
 				Set<String> hashtags = new HashSet<String>();
-				for (HashtagEntity hash : hashtagList){
+				for (HashtagEntity hash : hashtagList) {
 					hashtags.add(hash.getText());
 				}
-				Set<String> out = processor(hashtags);
+				String tweetText = getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName())).toString();
+				postTweet(tweetText+"\n@" +message.getSenderScreenName());
 			}
 			@Override
 			public void onStatus(Status status) {
-				HashtagEntity[] hashtagList = status.getHashtagEntities();
-				String username = status.getUser().getScreenName(), text = status.getText(), lastword = text.substring(text.lastIndexOf(" ") + 1);
-				Set<String> hashtags = new HashSet<String>();
-				for (HashtagEntity hash : hashtagList){
-					hashtags.add(hash.getText());
+				if (status.getText().contains(ourUserNameMention)) {
+					System.out.println("recieved tweet from " + status.getUser().getScreenName() +
+							"saying " + status.getText());
+					HashtagEntity[] hashtagList = status.getHashtagEntities();
+					Set<String> hashtags = new HashSet<String>();
+					for (HashtagEntity hash : hashtagList) {
+						hashtags.add(hash.getText());
+					}
+					String text = status.getText();
+					text=NaturalLanguage.removeLastWords(text);
+					if (text.length() < 1) return;
+					String tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName())).toString();
+					postTweet(tweetText + "\n@" + status.getUser().getScreenName());
 				}
-				Set<String> out = processor(hashtags);
 			}
 			@Override
 			public void onException(Exception arg0) {}
@@ -164,6 +200,10 @@ public class TwitterActions {
 			public void onDeletionNotice(StatusDeletionNotice arg0) {}
 			@Override
 			public void onUserProfileUpdate(User arg0) {}
+
+			@Override
+			public void onUserSuspension(long l) {}
+
 			@Override
 			public void onUserListUpdate(User arg0, UserList arg1) {}
 			@Override
@@ -196,68 +236,75 @@ public class TwitterActions {
 			public void onStallWarning(StallWarning arg0) {}
 			@Override
 			public void onUnfollow(User arg0, User arg1) {}
+			@Override
+			public void onUserDeletion(long arg0) {}
 		};
 		twitterStream.addListener(userStreamListener);
 		twitterStream.user();
 	}
 
-	public Set<String> processor(Set<String> hashtags){
-		String filename = "unix.dict";
-		Set<String> dict = new HashSet<String>(), out = new HashSet<String>();
-		try{
-			FileReader inputFile = new FileReader(filename);
-			BufferedReader bufferReader = new BufferedReader(inputFile);
-			for(String line = bufferReader.readLine(); line != null; line = bufferReader.readLine()) { 
-				if (line.length() > 2) dict.add(line);
-			}
-			bufferReader.close();
-			inputFile.close();
-		}catch(Exception e){
-			System.out.println("Error reading file: " + e.getMessage());                      
-		}
-		Iterator<String> itr = hashtags.iterator();
-		while (itr.hasNext()){
-			splitString(itr.next(), dict, out);
-		}
-		return out;
-	}
-
-	void splitString(String input, Set<String> dict, Set<String> out) {
-		int pos = 0, matched = 0;
-		String match = "";
-		if (input.length() < 3) return;
-		if (dict.contains(input)) return;
-		while (input.length() != 0){
-			for (int i = 1; i <= input.length(); i++) {
-				String split = input.substring(0, i);
-				if (dict.contains(split)) {
-					match = split;
-					pos = i;
-					matched = 1;
+	public void trendTweetListener(){
+		StatusListener listener = new StatusListener() {
+			int counter = 0;
+			@Override
+			public void onException(Exception arg0) {}
+			@Override
+			public void onDeletionNotice(StatusDeletionNotice arg0) {}
+			@Override
+			public void onScrubGeo(long arg0, long arg1) {}
+			@Override
+			public void onStatus(Status status) {
+				HashtagEntity[] hashtagList = status.getHashtagEntities();
+				Set<String> hashtags = new HashSet<String>();
+				for (HashtagEntity hash : hashtagList){
+					hashtags.add(hash.getText());
+				}
+				if (counter < 5){
+					String text=NaturalLanguage.removeLastWords(status.getText());
+					currentTweets.add(new Tweet(text, hashtags, status.getUser().getScreenName()));
+					System.out.println("GETTING STATUS:" + status.getText());
+					System.out.println("Text being sent: " + text);
+					System.out.println("\n\ncounter = " + counter);
+					counter++;
+				}
+				else {
+					System.out.println("Done with listener.");
+					twitterStream.shutdown();
 				}
 			}
-			if (matched == 1) {
-				input = input.substring(pos);
-				matched = 0;
-				System.out.println(match); //testing
-				out.add(match);
+			@Override
+			public void onTrackLimitationNotice(int arg0) {}
+			@Override
+			public void onStallWarning(StallWarning arg0) {}
+		};
+		while (true){
+			FilterQuery fq = new FilterQuery();
+			fq.track(getTrends());
+			twitterStream.addListener(listener);
+			twitterStream.filter(fq);
+			try {
+				TimeUnit.MINUTES.sleep(30);          
+			} catch(InterruptedException ex) {
+				Thread.currentThread().interrupt();
 			}
-			else {
-				input = input.substring(1);
-			}
+			System.out.println("Resuming.");
+			postTweet(handleTweets());
+			twitterStream.removeListener(listener);
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-		TwitterActions client = new TwitterActions();
-		//client.readKeys();
-		//client.getTokens();
-		//client.readTokens();
-		//client.authorization();
-		//client.listener();
-		//client.processor();
-		Set<String> x = new HashSet<String>();	//testing
-		x.add("adfshovelheadkkbombxtanklkmklnn.");
-		client.processor(x);
+	public String[] getTrends(){
+		Trends trends = null;
+		String[] out = new String[3];
+		try {
+			trends = twitter.getPlaceTrends(23424977); //us woeid
+		} catch (TwitterException e) {
+			e.printStackTrace();
+		}
+		for (int i = 0; i < 3; i++) {
+			out[i] = trends.getTrends()[i].getName();
+			System.out.println(out[i]);
+		}
+		return out;
 	}
 }
