@@ -24,15 +24,6 @@ public class LyricChooser {
         this.tweet = tweet;
         this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
         System.out.println("[++] rhyming with " + tweet.getRhymeWord());
-        if (tweet.hasHashtags()){
-        	System.out.println("[++] Hashtags are:");
-        	Iterator<String[]> itr = tweet.getHashtags().iterator();
-        	while (itr.hasNext()){
-        		for (String word : itr.next()){
-        			System.out.print(" " + word);
-        		}
-        	}
-        }
     }
 
     public void chooseLyrics() {
@@ -88,20 +79,29 @@ public class LyricChooser {
         int maxScore = 0;
         RhymeLine bestLine = rhymeLines.get(0);
         for (RhymeLine line : rhymeLines) {
-            String fullRhyme = line.line1+line.line2;
+            String line1Comp = line.line1.toLowerCase();
+            String line2Comp = line.line2.toLowerCase(); // for proper comparisons.
+            String fullRhyme = line1Comp + "\n" + line2Comp;
             //check if last word and rhyme word have the same number of sels
             if (NaturalLanguage.numberOfSyllables(tweet.getRhymeWord())==line.syllables) line.score+=10;
 
             //check if last word is contained in line
-            if (line.line1.contains(tweet.getRhymeWord())) line.score += 10;
-            if (line.line2.contains(tweet.getRhymeWord())) line.score += 10;
+            if (line1Comp.contains(tweet.getRhymeWord().toLowerCase())) line.score += 10;
+            if (line2Comp.contains(tweet.getRhymeWord().toLowerCase())) line.score += 10;
 
             //checks if it contains you
-            if (line.line2.contains("you") || line.line2.contains("your") || line.line2.contains("you're")) line.score += 10;
+            if (line2Comp.contains("you") || line2Comp.contains("your") || line2Comp.contains("you're")) line.score += 10;
 
             //checks if it contains a question
-            if (line.line1.contains("?")) line.score += 10;
-            if (line.line2.contains("?")) line.score += 10;
+            if (line1Comp.contains("?")) line.score += 10;
+            if (line2Comp.contains("?")) line.score += 10;
+
+            if (tweet.getHashtags().size()>0) {
+                for (String hashTag : tweet.getHashtags()) {
+                    if (fullRhyme.contains(hashTag.toLowerCase()))
+                        line.score += 10;
+                }
+            }
 
             if (line.score>maxScore) {
                 bestLine=line;

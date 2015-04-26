@@ -1,8 +1,12 @@
+import AI.NaturalLanguage;
 import DataManagement.LyricsDB;
+import TwitterInteraction.Tweet;
 import TwitterInteraction.TwitterActions;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by doogy on 17/04/15.
@@ -40,5 +44,6 @@ public class MainPac {
         TA.authorization();
         TA.listener();
         TA.trendTweetListener();
+
     }
 }

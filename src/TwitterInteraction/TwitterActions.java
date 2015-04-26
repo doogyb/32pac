@@ -170,11 +170,11 @@ public class TwitterActions {
 			public void onDirectMessage(DirectMessage message) {
 				System.out.println("Replying to direct message");
 				HashtagEntity[] hashtagList = message.getHashtagEntities();
-				Set<String> hashtags = new HashSet<String>();
+				ArrayList<String> hashTags = new ArrayList<String>();
 				for (HashtagEntity hash : hashtagList) {
-					hashtags.add(hash.getText());
+					hashTags.add(hash.getText());
 				}
-				RhymeLine tweetText = getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName()));
+				RhymeLine tweetText = getTweetText(new Tweet(message.getText(), hashTags, message.getSender().getScreenName()));
 				if (tweetText != null) postTweet(tweetText.toString()+"\n@" +message.getSenderScreenName());
 				else {System.out.println("[-] Could not rhyme with that tweet :(");}
 			}
@@ -184,15 +184,15 @@ public class TwitterActions {
 					System.out.println("[+] Recieved tweet from " + status.getUser().getScreenName() +
 							"saying " + status.getText());
 					HashtagEntity[] hashtagList = status.getHashtagEntities();
-					Set<String> hashtags = new HashSet<String>();
+					ArrayList<String> hashTags = new ArrayList<String>();
 					for (HashtagEntity hash : hashtagList) {
-						hashtags.add(hash.getText());
+						hashTags.add(hash.getText());
 					}
 					String text = status.getText();
 
 					if (text.length() < 1) return;
 
-					RhymeLine tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName()));
+					RhymeLine tweetText = getTweetText(new Tweet(text, hashTags, status.getUser().getScreenName()));
 					if (tweetText != null) postTweet(tweetText.toString() + "\n@" + status.getUser().getScreenName());
 					else {System.out.println("[-] Could not rhyme with that tweet :(");}
 
@@ -265,13 +265,14 @@ public class TwitterActions {
 			@Override
 			public void onStatus(Status status) {
 				HashtagEntity[] hashtagList = status.getHashtagEntities();
-				Set<String> hashtags = new HashSet<String>();
+				ArrayList<String> hashTags = new ArrayList<String>();
 				for (HashtagEntity hash : hashtagList){
-					hashtags.add(hash.getText());
+					hashTags.add(hash.getText());
 				}
-				if (counter < 1){
-					currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
+				if (counter < 10){
+					currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName()));
 					System.out.println("\n[+] GETTING STATUS:" + status.getText());
+					System.out.println("\n[+] Using these hashTag words: " + currentTweets.get(counter).getHashtags());
 					counter++;
 					
 				}
@@ -300,7 +301,7 @@ public class TwitterActions {
 			twitterStream.cleanUp();
 			twitterStream.removeListener(trendListener);
 			System.out.println("Resuming.");
-			postTweet(handleTweets());
+			System.out.println(handleTweets());
 		}
 	}
 

@@ -112,33 +112,34 @@ public class NaturalLanguage {
 		return rhyme;
     }
 
-//    public static ArrayList<String> splitString(String input) {
-//        ArrayList<String> out = new ArrayList<String>();
-//        int pos = 0, matched = 0;
-//        String match = "";
-//        if (input.length() < 3) return null;
-//        if (dict.contains(input)) return null;
-//        while (input.length() != 0){
-//            for (int i = 1; i <= input.length(); i++) {
-//                String split = input.substring(0, i);
-//                if (dict.contains(split)) {
-//                    match = split;
-//                    pos = i;
-//                    matched = 1;
-//                }
-//            }
-//            if (matched == 1) {
-//                input = input.substring(pos);
-//                matched = 0;
-//                //System.out.println(match); //testing
-//                out.add(match);
-//            }
-//            else {
-//                input = input.substring(1);
-//            }
-//        }
-//        return out;
-//    }
+    public static ArrayList<String> splitString(String input) {
+        ArrayList<String> out = new ArrayList<String>();
+        int pos = 0, matched = 0;
+        String match = "";
+		input = input.toLowerCase();
+        if (input.length() < 3) return null;
+        if (dict.contains(input)) return null;
+        while (input.length() != 0){
+            for (int i = 1; i <= input.length(); i++) {
+                String split = input.substring(0, i);
+                if (dict.contains(split)) {
+                    match = split;
+                    pos = i;
+                    matched = 1;
+                }
+            }
+            if (matched == 1) {
+                input = input.substring(pos);
+                matched = 0;
+                //System.out.println(match); //testing
+                out.add(match.toLowerCase());
+            }
+            else {
+                input = input.substring(1);
+            }
+        }
+        return out;
+    }
     
      public static String[] splitHashtag(String input) {
         return input.split("(?=[A-Z])");
