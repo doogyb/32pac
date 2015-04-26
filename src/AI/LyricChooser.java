@@ -12,7 +12,6 @@ import java.util.*;
  */
 
 public class LyricChooser {
-
     public static final int MIN_LINE_LENGTH = 5;
     public static final int MAX_TWEET_LENGTH = 140;
 
@@ -23,15 +22,13 @@ public class LyricChooser {
     public LyricChooser(Tweet tweet) {
         this.tweet = tweet;
         this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
-        System.out.println("[++] rhyming with " + tweet.getRhymeWord());
+        System.out.println("[++] rhyming with " + tweet.toString());
     }
 
     public void chooseLyrics() {
         File[] songs = new File("lyrics").listFiles();
         BufferedReader br = null;
         String line1=null, line2=null, lastWord1, lastWord2;
-        String artist=null, songName=null, album=null;
-        String[] words;
 
         for (File song : songs) {
             try {
@@ -100,9 +97,7 @@ public class LyricChooser {
 
             if (tweet.getHashtags().size()>0) {
                 for (String hashTag : tweet.getHashtags()) {
-                    if (fullRhyme.contains(hashTag.toLowerCase())) {
-                        line.score += 15;
-                    }
+                    if (fullRhyme.contains(hashTag.toLowerCase())) line.score += 15;
                 }
             }
 
