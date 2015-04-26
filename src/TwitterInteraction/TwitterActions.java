@@ -1,4 +1,5 @@
 package TwitterInteraction;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
@@ -45,22 +47,23 @@ public class TwitterActions {
 	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
 
 	public String handleTweets(){
-		System.out.println("Called");
-		System.out.println("Contents of cw: " + currentTweets);
+		System.out.println("[+] Generating tweet ..");
 		int bestScore = 0, currentScore = 0;
 		RhymeLine bestRhymeLine = null;
 		String username = null;
 		for (Tweet tweet : currentTweets) {
-			System.out.println("TWEET = " + getTweetText(tweet));
 			RhymeLine currentRhymeLine = getTweetText(tweet);
-			currentScore = currentRhymeLine.get_score();
+			if (currentRhymeLine == null) continue;
+			currentScore = currentRhymeLine.getScore();
 			if (currentScore > bestScore){
 				bestRhymeLine = currentRhymeLine;
 				bestScore = currentScore;
 				username = tweet.getUserName();
 			}
 		}
-		return NaturalLanguage.filter(bestRhymeLine.toString() + "\n@" + username);
+		currentTweets.clear();
+		if (bestRhymeLine == null) return null;
+		return NaturalLanguage.filter(bestRhymeLine.toString()) + "\n@" + username;
 	}
 
 	public static RhymeLine getTweetText(Tweet tw) {
@@ -76,7 +79,7 @@ public class TwitterActions {
 			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			twitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			AccessToken oauthAccessToken = new AccessToken(accessToken, accessTokenSecret);
-			twitter.setOAuthAccessToken(oauthAccessToken);	
+			twitter.setOAuthAccessToken(oauthAccessToken);
 			twitterStream.setOAuthAccessToken(oauthAccessToken);
 		} catch (Exception e) {
 			System.out.println("Authorization failed!!!");
@@ -85,7 +88,8 @@ public class TwitterActions {
 
 	public void postTweet(String text){
 		try{
-			twitter.updateStatus(text);
+			System.out.println("Final Tweet" + text);
+			//twitter.updateStatus(text);
 			System.out.println("Tweet Successful: '" + text + "'");
 		}
 		catch(Exception e){
@@ -120,27 +124,27 @@ public class TwitterActions {
 			writer.write(accessToken.getTokenSecret());
 			writer.close();
 		} catch (IOException e) {
-			System.out.println("Error while saving file:" + e.getMessage());  
+			System.out.println("Error while saving file:" + e.getMessage());
 		}
 	}
 
 	public void readKeys() {
-		String keys = "keys.txt", secret[] = new String[2]; 
+		String keys = "keys.txt", secret[] = new String[2];
 		try{
 			FileReader inputFile = new FileReader(keys);
 			BufferedReader bufferReader = new BufferedReader(inputFile);
-			for(int counter = 0; counter < 2; counter++) { 
+			for(int counter = 0; counter < 2; counter++) {
 				String line = bufferReader.readLine();
 				secret[counter] = line;
 			}
 			bufferReader.close();
 			inputFile.close();
 		}catch(Exception e){
-			System.out.println("Error reading file: " + e.getMessage());                      
+			System.out.println("Error reading file: " + e.getMessage());
 		}
 		CONSUMER_KEY = secret[0];
 		CONSUMER_KEY_SECRET = secret[1];
-	} 
+	}
 
 	public void readTokens() {
 		String tokens = "tokens.txt", secret[] = new String[2];
@@ -154,7 +158,7 @@ public class TwitterActions {
 			bufferReader.close();
 			inputFile.close();
 		}catch(Exception e){
-			System.out.println("Error reading file: " + e.getMessage());                      
+			System.out.println("Error reading file: " + e.getMessage());
 		}
 		accessToken = secret[0];
 		accessTokenSecret = secret[1];
@@ -170,13 +174,14 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList) {
 					hashtags.add(hash.getText());
 				}
-				String tweetText = getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName())).toString();
-				postTweet(tweetText+"\n@" +message.getSenderScreenName());
+				RhymeLine tweetText = getTweetText(new Tweet(message.getText(), hashtags, message.getSender().getScreenName()));
+				if (tweetText != null) postTweet(tweetText.toString()+"\n@" +message.getSenderScreenName());
+				else {System.out.println("[-] Could not rhyme with that tweet :(");}
 			}
 			@Override
 			public void onStatus(Status status) {
 				if (status.getText().contains(ourUserNameMention)) {
-					System.out.println("recieved tweet from " + status.getUser().getScreenName() +
+					System.out.println("[+] Recieved tweet from " + status.getUser().getScreenName() +
 							"saying " + status.getText());
 					HashtagEntity[] hashtagList = status.getHashtagEntities();
 					Set<String> hashtags = new HashSet<String>();
@@ -184,10 +189,15 @@ public class TwitterActions {
 						hashtags.add(hash.getText());
 					}
 					String text = status.getText();
-					text=NaturalLanguage.removeLastWords(text);
+
 					if (text.length() < 1) return;
-					String tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName())).toString();
-					postTweet(tweetText + "\n@" + status.getUser().getScreenName());
+
+					RhymeLine tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName()));
+					if (tweetText != null) postTweet(tweetText.toString() + "\n@" + status.getUser().getScreenName());
+					else {System.out.println("[-] Could not rhyme with that tweet :(");}
+
+					//String tweetText = getTweetText(new Tweet(text, hashtags, status.getUser().getScreenName())).toString();
+					//postTweet(tweetText + "\n@" + status.getUser().getScreenName());
 				}
 			}
 			@Override
@@ -244,7 +254,7 @@ public class TwitterActions {
 	}
 
 	public void trendTweetListener(){
-		StatusListener listener = new StatusListener() {
+		StatusListener trendListener = new StatusListener() {
 			int counter = 0;
 			@Override
 			public void onException(Exception arg0) {}
@@ -259,17 +269,16 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList){
 					hashtags.add(hash.getText());
 				}
-				if (counter < 5){
-					String text=NaturalLanguage.removeLastWords(status.getText());
-					currentTweets.add(new Tweet(text, hashtags, status.getUser().getScreenName()));
-					System.out.println("GETTING STATUS:" + status.getText());
-					System.out.println("Text being sent: " + text);
-					System.out.println("\n\ncounter = " + counter);
+				if (counter < 1){
+					currentTweets.add(new Tweet(status.getText(), hashtags, status.getUser().getScreenName()));
+					System.out.println("\n[+] GETTING STATUS:" + status.getText());
 					counter++;
+					
 				}
 				else {
-					System.out.println("Done with listener.");
-					twitterStream.shutdown();
+					System.out.println("\n [+] Quitting listener.");
+					counter = 0;
+					while (true){}
 				}
 			}
 			@Override
@@ -280,16 +289,18 @@ public class TwitterActions {
 		while (true){
 			FilterQuery fq = new FilterQuery();
 			fq.track(getTrends());
-			twitterStream.addListener(listener);
+			twitterStream.addListener(trendListener);
 			twitterStream.filter(fq);
 			try {
-				TimeUnit.MINUTES.sleep(30);          
+				TimeUnit.SECONDS.sleep(10);
 			} catch(InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
+			twitterStream.shutdown();
+			twitterStream.cleanUp();
+			twitterStream.removeListener(trendListener);
 			System.out.println("Resuming.");
 			postTweet(handleTweets());
-			twitterStream.removeListener(listener);
 		}
 	}
 

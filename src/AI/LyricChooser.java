@@ -1,12 +1,11 @@
 package AI;
 
+import TwitterInteraction.Tweet;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import TwitterInteraction.Tweet;
+import java.util.*;
 
 /**
  * Created by samuel on 08/04/15.
@@ -24,6 +23,16 @@ public class LyricChooser {
     public LyricChooser(Tweet tweet) {
         this.tweet = tweet;
         this.rhymeList = NaturalLanguage.getRhymes(tweet.getRhymeWord());
+        System.out.println("[++] rhyming with " + tweet.getRhymeWord());
+        if (tweet.hasHashtags()){
+        	System.out.println("[++] Hashtags are:");
+        	Iterator<String[]> itr = tweet.getHashtags().iterator();
+        	while (itr.hasNext()){
+        		for (String word : itr.next()){
+        			System.out.print(" " + word);
+        		}
+        	}
+        }
     }
 
     public void chooseLyrics() {
@@ -38,8 +47,6 @@ public class LyricChooser {
             catch (IOException e) { e.printStackTrace(); }
 
             if (song.length()<500) continue; // ignore empty or nearly empty files
-
-            //System.out.println(song.getAbsolutePath());
 
             try {
                 line1=br.readLine();
@@ -77,8 +84,9 @@ public class LyricChooser {
     }
 
     public RhymeLine selectBest() {
+        if (rhymeLines.size() == 0) return null;
         int maxScore = 0;
-        RhymeLine bestLine=null;
+        RhymeLine bestLine = rhymeLines.get(0);
         for (RhymeLine line : rhymeLines) {
             String fullRhyme = line.line1+line.line2;
             //check if last word and rhyme word have the same number of sels
@@ -101,7 +109,7 @@ public class LyricChooser {
             }
 
         }
-        bestLine.set_score(maxScore);
+        bestLine.setScore(maxScore);
         return bestLine;
     }
 }

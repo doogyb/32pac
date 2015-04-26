@@ -74,6 +74,7 @@ public class LyricsDB {
     }
 
     public static boolean haveLyrics() {
-        return ((new File("lyrics/").list().length) > 0);
+        File lyricsFile = new File("lyrics/");
+        return ( (lyricsFile.exists()) && ((lyricsFile.list().length) > 0) );
     }
 }
