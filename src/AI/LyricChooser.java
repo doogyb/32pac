@@ -25,6 +25,12 @@ public class LyricChooser {
         System.out.println("[++] rhyming with " + tweet.toString());
     }
 
+    private static boolean skip(String line1, String line2, int offset) {
+        return (line1.length() < MIN_LINE_LENGTH || line2.length() < MIN_LINE_LENGTH || line1.contains("[") ||
+                line2.contains("[") || NaturalLanguage.getLastWord(line1) == null ||
+                NaturalLanguage.getLastWord(line2) == null || (line1 + line2).length() > (MAX_TWEET_LENGTH + offset));
+    }
+
     public void chooseLyrics() {
         File[] songs = new File("lyrics").listFiles();
         BufferedReader br = null;
@@ -35,22 +41,14 @@ public class LyricChooser {
                 br = new BufferedReader(new FileReader(song));
                 if (song.length() < 500) continue; // ignore empty or nearly empty files
 
-                try {
-                    line2 = br.readLine();
-                } catch (IOException e) {e.printStackTrace();}
+                try {line2 = br.readLine();}
+                catch (IOException e) {e.printStackTrace();}
 
                 while (true) {
                     try {
                         line1 = line2;
-
                         if ((line2 = br.readLine()) == null) break;
-
-                        if (line1.length() < MIN_LINE_LENGTH || line2.length() < MIN_LINE_LENGTH) continue;
-                        if (line1.contains("[") || line2.contains("[")) continue;
-                        if (NaturalLanguage.getLastWord(line1) == null ||
-                                NaturalLanguage.getLastWord(line2) == null) continue;
-                        if ((line1 + line2).length() > (MAX_TWEET_LENGTH + tweet.getUserName().length() + 1))
-                            continue; // rhyme is too long to be tweeted
+                        if (skip(line1, line2, tweet.getUserName().length() + 1)) continue;
 
                         lastWord1 = NaturalLanguage.getLastWord(line1);
                         lastWord2 = NaturalLanguage.getLastWord(line2);
