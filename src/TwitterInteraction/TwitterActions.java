@@ -42,6 +42,7 @@ public class TwitterActions {
 	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 	private static long statusId = 0;
 	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
+	private int globalCounter = 0;
 
 	//Sets the keys and tokens.
 	public void authorization() {
@@ -122,8 +123,8 @@ public class TwitterActions {
 
 	//Listen to tweets containing trending hashtags.
 	public void trendTweetListener(){
-		StatusListener trendListener = new StatusListener() {
-			public int counter = 0;
+		final StatusListener trendListener = new StatusListener() {
+
 			@Override
 			public void onException(Exception arg0) {}
 			@Override
@@ -139,14 +140,15 @@ public class TwitterActions {
 					respondToMention(status.getHashtagEntities(), status.getText(),
 							status.getUser().getScreenName(), status.getUser().getScreenName());
 				}
-				HashtagEntity[] hashtagList = status.getHashtagEntities();
-				ArrayList<String> hashTags = new ArrayList<String>();
-				for (HashtagEntity hash : hashtagList) {hashTags.add(hash.getText()); }
-				if (counter < MAX_TWEETS) {
+
+				if (globalCounter < MAX_TWEETS) {
+					HashtagEntity[] hashtagList = status.getHashtagEntities();
+					ArrayList<String> hashTags = new ArrayList<String>();
+					for (HashtagEntity hash : hashtagList) {hashTags.add(hash.getText()); }
 					currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName(), status.getId()));
 					System.out.println("\n[+] Getting status: " + status.getText());
-					System.out.println("[+] Using these hashTag words: " + currentTweets.get(counter).getHashtags());
-					counter++;
+					System.out.println("[+] Using these hashTag words: " + currentTweets.get(globalCounter).getHashtags());
+					globalCounter++;
 				}
 			}
 			@Override
@@ -162,7 +164,7 @@ public class TwitterActions {
 			fq.track(queries);
 			twitterStream.addListener(trendListener);
 			twitterStream.filter(fq);
-			try { TimeUnit.SECONDS.sleep(30); }
+			try { TimeUnit.MINUTES.sleep(TREND_TIME); }
 			catch(InterruptedException ex) { Thread.currentThread().interrupt(); }
 			postTweet(handleTweets());
 			twitterStream.shutdown();
@@ -172,9 +174,10 @@ public class TwitterActions {
 			fq.track(name);
 			twitterStream.addListener(trendListener);
 			twitterStream.filter(fq);
-			try { 
+			try {
 				System.out.println("\n[+] Listening to tweets directed at us.");
-				TimeUnit.MINUTES.sleep(2); 
+				TimeUnit.HOURS.sleep(STANDBY_TIME);
+				globalCounter = 0;
 			}
 			catch(InterruptedException ex) { Thread.currentThread().interrupt(); }
 			System.out.println("\n[+] Resuming.");
