@@ -34,7 +34,7 @@ public class TwitterActions {
 	 * Created by Fergus on 08/04/15.
 	 */
 
-	public static final int MAX_TWEETS = 5;
+	public static final int MAX_TWEETS = 5, TREND_TIME = 2, STANDBY_TIME = 12;
 
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
 	private static String ourUserNameMention = "@32_Pac";
@@ -123,7 +123,7 @@ public class TwitterActions {
 	//Listen to tweets containing trending hashtags.
 	public void trendTweetListener(){
 		StatusListener trendListener = new StatusListener() {
-			int counter = 0;
+			public int counter = 0;
 			@Override
 			public void onException(Exception arg0) {}
 			@Override
@@ -144,7 +144,6 @@ public class TwitterActions {
 				for (HashtagEntity hash : hashtagList) {hashTags.add(hash.getText()); }
 				if (counter < MAX_TWEETS) {
 					currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName(), status.getId()));
-					System.out.println("ID HERE: " + status.getId());
 					System.out.println("\n[+] Getting status: " + status.getText());
 					System.out.println("[+] Using these hashTag words: " + currentTweets.get(counter).getHashtags());
 					counter++;
@@ -163,7 +162,7 @@ public class TwitterActions {
 			fq.track(queries);
 			twitterStream.addListener(trendListener);
 			twitterStream.filter(fq);
-			try { TimeUnit.MINUTES.sleep(1); }
+			try { TimeUnit.SECONDS.sleep(30); }
 			catch(InterruptedException ex) { Thread.currentThread().interrupt(); }
 			postTweet(handleTweets());
 			twitterStream.shutdown();
@@ -172,10 +171,10 @@ public class TwitterActions {
 			String name[] = {ourUserNameMention};
 			fq.track(name);
 			twitterStream.addListener(trendListener);
+			twitterStream.filter(fq);
 			try { 
 				System.out.println("\n[+] Listening to tweets directed at us.");
-				
-				TimeUnit.HOURS.sleep(24); 
+				TimeUnit.MINUTES.sleep(2); 
 			}
 			catch(InterruptedException ex) { Thread.currentThread().interrupt(); }
 			System.out.println("\n[+] Resuming.");
@@ -186,13 +185,11 @@ public class TwitterActions {
 	}
 
 	//Generate a respones to users mentioning 32Pac.
-
 	private void respondToMention(HashtagEntity[] hashtagList, String tweet, String username, String toUsername) {
 		ArrayList<String> hashTags = new ArrayList<String>();
 		for (HashtagEntity hash : hashtagList) hashTags.add(hash.getText());
 		RhymeLine tweetText = getTweetText(new Tweet(tweet, hashTags, username, statusId));
 		if (tweetText != null) {
-			//System.out.println("aaaa");
 			postTweet(tweetText.toString()+"\n@" + toUsername);
 		}
 		else {System.out.println("[-] Could not rhyme with that tweet :(");}
