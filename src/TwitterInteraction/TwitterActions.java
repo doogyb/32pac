@@ -55,9 +55,11 @@ public class TwitterActions {
 		try {
 			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			twitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
+			twitterStreamTrend.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			AccessToken oauthAccessToken = new AccessToken(accessToken, accessTokenSecret);
 			twitter.setOAuthAccessToken(oauthAccessToken);
 			twitterStream.setOAuthAccessToken(oauthAccessToken);
+			twitterStreamTrend.setOAuthAccessToken(oauthAccessToken);
 		} catch (Exception e) { System.out.println("Authorization failed!!!"); }
 	}
 
