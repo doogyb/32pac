@@ -10,7 +10,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-
 import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
@@ -44,7 +43,8 @@ public class TwitterActions {
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
 	private static String ourUserNameMention = "@32_Pac";
 	private static Twitter twitter = new TwitterFactory().getInstance();
-	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
+	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance(),
+			twitterStreamTrend = new TwitterStreamFactory().getInstance();
 	private static long statusId = 0;
 	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
 
@@ -233,13 +233,13 @@ public class TwitterActions {
 		while (true){
 			FilterQuery fq = new FilterQuery();
 			fq.track(getTrends());
-			twitterStream.addListener(trendListener);
-			twitterStream.filter(fq);
+			twitterStreamTrend.addListener(trendListener);
+			twitterStreamTrend.filter(fq);
 			try { TimeUnit.SECONDS.sleep(10); }
 			catch(InterruptedException ex) { Thread.currentThread().interrupt(); }
-			twitterStream.shutdown();
-			twitterStream.cleanUp();
-			twitterStream.removeListener(trendListener);
+			twitterStreamTrend.shutdown();
+			twitterStreamTrend.cleanUp();
+			twitterStreamTrend.removeListener(trendListener);
 			System.out.println("\n[+] Resuming.");
 			postTweet(handleTweets());
 		}
