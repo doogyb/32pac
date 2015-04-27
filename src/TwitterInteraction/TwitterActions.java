@@ -39,7 +39,7 @@ public class TwitterActions {
 	 * Created by Fergus on 08/04/15.
 	 */
 
-	public static final int MAX_TWEETS = 10;
+	public static final int MAX_TWEETS = 20;
 
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
 	private static String ourUserNameMention = "@32_Pac";
@@ -312,9 +312,7 @@ public class TwitterActions {
 				stat.setInReplyToStatusId(statusId);
 				twitter.updateStatus(stat);
 			}
-			else {
-				twitter.updateStatus(text);
-			}
+			else {	twitter.updateStatus(text); }
 			System.out.println("[+]Tweet Successful: '" + text + "'");
 		} catch(Exception e) { System.out.println("Tweet Error!!!!!!!");}
 	}
