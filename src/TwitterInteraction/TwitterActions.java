@@ -35,7 +35,6 @@ public class TwitterActions {
 	 */
 
 	public static final int MAX_TWEETS = 5, TREND_TIME = 2, STANDBY_TIME = 12;
-
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
 	private static String ourUserNameMention = "@32_Pac";
 	private static Twitter twitter = new TwitterFactory().getInstance();
@@ -104,7 +103,7 @@ public class TwitterActions {
 		CONSUMER_KEY_SECRET = secret[1];
 	}
 
-	//read the tokens from a file.
+	//Read the tokens from a file.
 	public void readTokens() {
 		String tokens = "tokens.txt", secret[] = new String[2];
 		try{
@@ -187,7 +186,7 @@ public class TwitterActions {
 		}
 	}
 
-	//Generate a respones to users mentioning 32Pac.
+	//Generate responses to users mentioning 32Pac.
 	private void respondToMention(HashtagEntity[] hashtagList, String tweet, String username, String toUsername) {
 		ArrayList<String> hashTags = new ArrayList<String>();
 		for (HashtagEntity hash : hashtagList) hashTags.add(hash.getText());
@@ -201,7 +200,7 @@ public class TwitterActions {
 	//Obtain trending hashtags.
 	public String[] getTrends(){
 		Trends trends = null;
-		String[] out = new String[3];
+		String[] out = new String[4];
 		try {
 			trends = twitter.getPlaceTrends(23424977); //us woeid
 		} catch (TwitterException e) {
