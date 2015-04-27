@@ -10,7 +10,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-import twitter4j.DirectMessage;
 import twitter4j.FilterQuery;
 import twitter4j.HashtagEntity;
 import twitter4j.StallWarning;
@@ -24,9 +23,6 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
-import twitter4j.User;
-import twitter4j.UserList;
-import twitter4j.UserStreamListener;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import AI.LyricChooser;
@@ -38,13 +34,12 @@ public class TwitterActions {
 	 * Created by Fergus on 08/04/15.
 	 */
 
-	public static final int MAX_TWEETS = 20;
+	public static final int MAX_TWEETS = 5;
 
 	private static String CONSUMER_KEY = "", CONSUMER_KEY_SECRET = "", accessToken = "", accessTokenSecret = "";
 	private static String ourUserNameMention = "@32_Pac";
 	private static Twitter twitter = new TwitterFactory().getInstance();
-	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance(),
-			twitterStreamTrend = new TwitterStreamFactory().getInstance();
+	private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
 	private static long statusId = 0;
 	ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
 
@@ -55,11 +50,9 @@ public class TwitterActions {
 		try {
 			twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			twitterStream.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
-			twitterStreamTrend.setOAuthConsumer(CONSUMER_KEY, CONSUMER_KEY_SECRET);
 			AccessToken oauthAccessToken = new AccessToken(accessToken, accessTokenSecret);
 			twitter.setOAuthAccessToken(oauthAccessToken);
 			twitterStream.setOAuthAccessToken(oauthAccessToken);
-			twitterStreamTrend.setOAuthAccessToken(oauthAccessToken);
 		} catch (Exception e) { System.out.println("Authorization failed!!!"); }
 	}
 
@@ -127,74 +120,6 @@ public class TwitterActions {
 		accessTokenSecret = secret[1];
 	}
 
-	//Listen to tweets directed at our bot.
-	public void listener(){
-		final UserStreamListener userStreamListener = new UserStreamListener() {
-			@Override
-			public void onDirectMessage(DirectMessage message) {
-				System.out.println("Replying to direct message");
-				statusId = 0;
-				respondToMention(message.getHashtagEntities(), message.getText(),
-						message.getSender().getScreenName(), message.getSenderScreenName());
-			}
-
-			@Override
-			public void onStatus(Status status) {
-				if (status.getText().contains(ourUserNameMention)) {
-					System.out.println("\n[+] Recieved tweet from " + status.getUser().getScreenName() +
-							"saying " + status.getText());
-					statusId = status.getId();
-					respondToMention(status.getHashtagEntities(), status.getText(),
-							status.getUser().getScreenName(), status.getUser().getScreenName());
-				}
-			}
-			@Override
-			public void onException(Exception arg0) {}
-			@Override
-			public void onTrackLimitationNotice(int arg0) {}
-			@Override
-			public void onScrubGeo(long arg0, long arg1) {}
-			@Override
-			public void onDeletionNotice(StatusDeletionNotice arg0) {}
-			@Override
-			public void onUserProfileUpdate(User arg0) {}
-			@Override
-			public void onUserListUpdate(User arg0, UserList arg1) {}
-			@Override
-			public void onUserListUnsubscription(User arg0, User arg1, UserList arg2) {}
-			@Override
-			public void onUserListSubscription(User arg0, User arg1, UserList arg2) {}
-			@Override
-			public void onUserListMemberDeletion(User arg0, User arg1, UserList arg2) {}
-			@Override
-			public void onUserListMemberAddition(User arg0, User arg1, UserList arg2) {}
-			@Override
-			public void onUserListDeletion(User arg0, UserList arg1) {}
-			@Override
-			public void onUserListCreation(User arg0, UserList arg1) {}
-			@Override
-			public void onUnfavorite(User arg0, User arg1, Status arg2) {}
-			@Override
-			public void onUnblock(User arg0, User arg1) {}
-			@Override
-			public void onFriendList(long[] arg0) {}
-			@Override
-			public void onFollow(User arg0, User arg1) {}
-			@Override
-			public void onFavorite(User arg0, User arg1, Status arg2) {}
-			@Override
-			public void onDeletionNotice(long arg0, long arg1) {}
-			@Override
-			public void onBlock(User arg0, User arg1) {}
-			@Override
-			public void onStallWarning(StallWarning arg0) {}
-			@Override
-			public void onUnfollow(User arg0, User arg1) {}
-		};
-		twitterStream.addListener(userStreamListener);
-		twitterStream.user();
-	}
-
 	//Listen to tweets containing trending hashtags.
 	public void trendTweetListener(){
 		StatusListener trendListener = new StatusListener() {
@@ -207,6 +132,13 @@ public class TwitterActions {
 			public void onScrubGeo(long arg0, long arg1) {}
 			@Override
 			public void onStatus(Status status) {
+				if (status.getText().contains(ourUserNameMention)){
+					System.out.println("\n[+] Recieved tweet from " + status.getUser().getScreenName() +
+							"saying " + status.getText());
+					statusId = status.getId();
+					respondToMention(status.getHashtagEntities(), status.getText(),
+							status.getUser().getScreenName(), status.getUser().getScreenName());
+				}
 				HashtagEntity[] hashtagList = status.getHashtagEntities();
 				ArrayList<String> hashTags = new ArrayList<String>();
 				for (HashtagEntity hash : hashtagList) {hashTags.add(hash.getText()); }
@@ -216,14 +148,6 @@ public class TwitterActions {
 					System.out.println("\n[+] Getting status: " + status.getText());
 					System.out.println("[+] Using these hashTag words: " + currentTweets.get(counter).getHashtags());
 					counter++;
-				} else {
-					System.out.println("\n[+] Quitting listener.");
-					counter = 0;
-					try {
-						TimeUnit.HOURS.sleep(25);
-					} catch(InterruptedException ex) {
-						Thread.currentThread().interrupt();
-					}
 				}
 			}
 			@Override
@@ -234,16 +158,30 @@ public class TwitterActions {
 
 		while (true){
 			FilterQuery fq = new FilterQuery();
-			fq.track(getTrends());
-			twitterStreamTrend.addListener(trendListener);
-			twitterStreamTrend.filter(fq);
-			try { TimeUnit.SECONDS.sleep(10); }
+			String[] queries = getTrends();
+			queries[queries.length - 1] = ourUserNameMention;
+			fq.track(queries);
+			twitterStream.addListener(trendListener);
+			twitterStream.filter(fq);
+			try { TimeUnit.MINUTES.sleep(1); }
 			catch(InterruptedException ex) { Thread.currentThread().interrupt(); }
-			twitterStreamTrend.shutdown();
-			twitterStreamTrend.cleanUp();
-			twitterStreamTrend.removeListener(trendListener);
-			System.out.println("\n[+] Resuming.");
 			postTweet(handleTweets());
+			twitterStream.shutdown();
+			twitterStream.cleanUp();
+			twitterStream.removeListener(trendListener);
+			String name[] = {ourUserNameMention};
+			fq.track(name);
+			twitterStream.addListener(trendListener);
+			try { 
+				System.out.println("\n[+] Listening to tweets directed at us.");
+				
+				TimeUnit.HOURS.sleep(24); 
+			}
+			catch(InterruptedException ex) { Thread.currentThread().interrupt(); }
+			System.out.println("\n[+] Resuming.");
+			twitterStream.shutdown();
+			twitterStream.cleanUp();
+			twitterStream.removeListener(trendListener);
 		}
 	}
 
@@ -314,7 +252,7 @@ public class TwitterActions {
 				stat.setInReplyToStatusId(statusId);
 				twitter.updateStatus(stat);
 			}
-			else {	twitter.updateStatus(text); }
+			else { twitter.updateStatus(text); }
 			System.out.println("[+]Tweet Successful: '" + text + "'");
 		} catch(Exception e) { System.out.println("Tweet Error!!!!!!!");}
 	}
