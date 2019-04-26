@@ -1,6 +1,7 @@
 package AI;
 
 import TwitterInteraction.Tweet;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -17,7 +18,7 @@ public class LyricChooser {
 
     private Tweet tweet;
     public ArrayList<RhymeLine> rhymeLines = new ArrayList<RhymeLine>();
-    protected HashMap<Integer,ArrayList<String>> rhymeList = new HashMap<Integer, ArrayList<String>>();
+    protected HashMap<Integer, ArrayList<String>> rhymeList = new HashMap<Integer, ArrayList<String>>();
 
     public LyricChooser(Tweet tweet) {
         this.tweet = tweet;
@@ -34,15 +35,18 @@ public class LyricChooser {
     public void chooseLyrics() {
         File[] songs = new File("lyrics").listFiles();
         BufferedReader br = null;
-        String line1=null, line2=null, lastWord1, lastWord2;
+        String line1 = null, line2 = null, lastWord1, lastWord2;
 
         for (File song : songs) {
             try {
                 br = new BufferedReader(new FileReader(song));
                 if (song.length() < 500) continue; // ignore empty or nearly empty files
 
-                try {line2 = br.readLine();}
-                catch (IOException e) {e.printStackTrace();}
+                try {
+                    line2 = br.readLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 while (true) {
                     try {
@@ -59,11 +63,18 @@ public class LyricChooser {
                                 break;
                             }
                         }
-                    } catch (IOException e) {e.printStackTrace();}
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (IOException e) { e.printStackTrace(); } finally {
-                try {if (br != null)br.close();}
-                catch (IOException ex) {ex.printStackTrace();}
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (br != null) br.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -86,8 +97,10 @@ public class LyricChooser {
             if (line2Comp.contains(tweet.getRhymeWord().toLowerCase())) line.score += 10;
 
             //checks if it contains you
-            if (line1Comp.contains("you") || line1Comp.contains("your") || line1Comp.contains("you're")) line.score += 10;
-            if (line2Comp.contains("you") || line2Comp.contains("your") || line2Comp.contains("you're")) line.score += 10;
+            if (line1Comp.contains("you") || line1Comp.contains("your") || line1Comp.contains("you're"))
+                line.score += 10;
+            if (line2Comp.contains("you") || line2Comp.contains("your") || line2Comp.contains("you're"))
+                line.score += 10;
 
             //checks if it contains a question
             if (line1Comp.contains("?")) line.score += 10;
@@ -99,9 +112,10 @@ public class LyricChooser {
                 }
             }
 
+
             if (line.score > maxScore) {
-                bestLine=line;
-                maxScore=line.score;
+                bestLine = line;
+                maxScore = line.score;
             }
 
         }
