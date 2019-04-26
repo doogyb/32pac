@@ -27,138 +27,36 @@ import AI.LyricChooser;
 import AI.NaturalLanguage;
 import AI.RhymeLine;
 
-public class TwitterActions {
+public class TwitterActions implements StatusListener {
     /**
      * Created by Fergus on 08/04/15.
      */
 
     public static final int MAX_TWEETS = 5, TREND_TIME = 2, STANDBY_TIME = 12;
-    private static String consumer_key = "", consumer_key_secret = "", accessToken = "", accessTokenSecret = "";
-    private static String ourUserNameMention = "@32_Pac";
-    private static Twitter twitter = new TwitterFactory().getInstance();
+    protected static String ourUserNameMention = "@32_Pac";
+    private static Twitter twitter;
     private TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
-    private static long statusId = 0;
+    protected static long statusId = 0;
     ArrayList<Tweet> currentTweets = new ArrayList<Tweet>();
     private int globalCounter = 0;
 
-    //Sets the keys and tokens.
-    public void authorization() {
-        readCredentials();
-        try {
-            twitter.setOAuthConsumer(consumer_key, consumer_key_secret);
-            twitterStream.setOAuthConsumer(consumer_key, consumer_key_secret);
-            AccessToken oauthAccessToken = new AccessToken(accessToken, accessTokenSecret);
-            twitter.setOAuthAccessToken(oauthAccessToken);
-            twitterStream.setOAuthAccessToken(oauthAccessToken);
-        } catch (Exception e) {
-            System.out.println("Authorization failed!!!");
-            e.printStackTrace();
-        }
+    public TwitterActions() {
+//        twitter = new TwitterFactory.getSingleton();
     }
 
-    //Obtain a new set of tokens.
-    public void getTokens() throws TwitterException, IOException {    //keys must be set before calling this
-        String filename = "tokens.txt";
-        twitter.setOAuthConsumer(consumer_key, consumer_key_secret);
-        RequestToken requestToken = twitter.getOAuthRequestToken();
-        System.out.println("Authorization URL: \n" + requestToken.getAuthorizationURL());
-        AccessToken accessToken = null;
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        while (null == accessToken) {
-            try {
-                System.out.print("Input PIN here: ");
-                String pin = br.readLine();
-                accessToken = twitter.getOAuthAccessToken(requestToken, pin);
-            } catch (TwitterException te) {
-                System.out.println("Failed to get access token, caused by: " + te.getMessage());
-                System.out.println("Retry input PIN");
-            }
-        }
-        br.close();
-        System.out.println("Access Token: " + accessToken.getToken());
-        System.out.println("Access Token Secret: " + accessToken.getTokenSecret());
-        try {
-            Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8"));
-            writer.write(accessToken.getToken());
-            writer.write(System.lineSeparator());
-            writer.write(accessToken.getTokenSecret());
-            writer.close();
-        } catch (IOException e) {
-            System.out.println("Error while saving file:" + e.getMessage());
-        }
-    }
-
-    private void readCredentials() {
-
-        Path credPath = Paths.get("credentials.txt");
-        try (Stream<String> creds = Files.lines(credPath)) {
-            String[] credsArr = creds.toArray(String[]::new);
-            this.accessToken = credsArr[0];
-            this.accessTokenSecret = credsArr[1];
-            this.consumer_key = credsArr[2];
-            this.consumer_key_secret = credsArr[3];
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
 
-    }
+
 
     //Listen to tweets containing trending hashtags.
     public void trendTweetListener() {
-        final StatusListener trendListener = new StatusListener() {
-
-            @Override
-            public void onException(Exception arg0) {
-            }
-
-            @Override
-            public void onDeletionNotice(StatusDeletionNotice arg0) {
-            }
-
-            @Override
-            public void onScrubGeo(long arg0, long arg1) {
-            }
-
-            @Override
-            public void onStatus(Status status) {
-                if (status.getText().contains(ourUserNameMention)) {
-                    System.out.println("\n[+] Recieved tweet from " + status.getUser().getScreenName() +
-                            "saying " + status.getText());
-                    statusId = status.getId();
-                    respondToMention(status.getHashtagEntities(), status.getText(),
-                            status.getUser().getScreenName(), status.getUser().getScreenName());
-                }
-
-                if (globalCounter < MAX_TWEETS) {
-                    HashtagEntity[] hashtagList = status.getHashtagEntities();
-                    ArrayList<String> hashTags = new ArrayList<String>();
-                    for (HashtagEntity hash : hashtagList) {
-                        hashTags.add(hash.getText());
-                    }
-                    currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName(), status.getId()));
-                    System.out.println("\n[+] Getting status: " + status.getText());
-                    System.out.println("[+] Using these hashTag words: " + currentTweets.get(globalCounter).getHashtags());
-                    globalCounter++;
-                }
-            }
-
-            @Override
-            public void onTrackLimitationNotice(int arg0) {
-            }
-
-            @Override
-            public void onStallWarning(StallWarning arg0) {
-            }
-        };
 
         while (true) {
             FilterQuery fq = new FilterQuery();
             String[] queries = getTrends();
             queries[queries.length - 1] = ourUserNameMention;
             fq.track(queries);
-            twitterStream.addListener(trendListener);
+            twitterStream.addListener(this);
             twitterStream.filter(fq);
             try {
                 TimeUnit.MINUTES.sleep(TREND_TIME);
@@ -168,10 +66,10 @@ public class TwitterActions {
             postTweet(handleTweets());
             twitterStream.shutdown();
             twitterStream.cleanUp();
-            twitterStream.removeListener(trendListener);
+            twitterStream.removeListener(this);
             String name[] = {ourUserNameMention};
             fq.track(name);
-            twitterStream.addListener(trendListener);
+            twitterStream.addListener(this);
             twitterStream.filter(fq);
             try {
                 System.out.println("\n[+] Listening to tweets directed at us.");
@@ -183,7 +81,7 @@ public class TwitterActions {
             System.out.println("\n[+] Resuming.");
             twitterStream.shutdown();
             twitterStream.cleanUp();
-            twitterStream.removeListener(trendListener);
+            twitterStream.removeListener(this);
         }
     }
 
@@ -245,25 +143,63 @@ public class TwitterActions {
 
     //Post the generated text to Twitter.
     public void postTweet(String text) {
+        Status status = null;
         try {
-            System.out.println("\n[*] Posting " + text);
-            if (statusId != 0) {
-                System.out.println("id: " + statusId);
-                StatusUpdate stat = new StatusUpdate(text);
-                stat.setInReplyToStatusId(statusId);
-                twitter.updateStatus(stat);
-            } else {
-                twitter.updateStatus(text);
-            }
-            System.out.println("[+]Tweet Successful: '" + text + "'");
-        } catch (Exception e) {
-            System.out.println("Tweet Error!!!!!!!");
+            status = twitter.updateStatus(text);
+        } catch (TwitterException e) {
+            e.printStackTrace();
         }
     }
 
     public static void main(String[] args) {
-        TwitterActions TA = new TwitterActions();
-        TA.readCredentials();
-        System.out.println(TA.accessToken + TA.accessTokenSecret + TA.consumer_key + TA.consumer_key_secret);
+        twitter = TwitterFactory.getSingleton();
+        Status status = null;
+        try {
+            status = twitter.updateStatus("Microphone check");
+        } catch (TwitterException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Successfully updated the status to [" + status.getText() + "].");
+//        TwitterActions TA = new TwitterActions();
+//        TA.readCredentials();
+//        System.out.println(TA.accessToken + TA.accessTokenSecret + TA.consumer_key + TA.consumer_key_secret);
     }
+
+    @Override
+    public void onStatus(Status status) {
+        if (status.getText().contains(ourUserNameMention)) {
+            System.out.println("\n[+] Recieved tweet from " + status.getUser().getScreenName() +
+                    "saying " + status.getText());
+            statusId = status.getId();
+            respondToMention(status.getHashtagEntities(), status.getText(),
+                    status.getUser().getScreenName(), status.getUser().getScreenName());
+        }
+
+        if (globalCounter < MAX_TWEETS) {
+            HashtagEntity[] hashtagList = status.getHashtagEntities();
+            ArrayList<String> hashTags = new ArrayList<String>();
+            for (HashtagEntity hash : hashtagList) {
+                hashTags.add(hash.getText());
+            }
+            currentTweets.add(new Tweet(status.getText(), hashTags, status.getUser().getScreenName(), status.getId()));
+            System.out.println("\n[+] Getting status: " + status.getText());
+            System.out.println("[+] Using these hashTag words: " + currentTweets.get(globalCounter).getHashtags());
+            globalCounter++;
+        }
+    }
+
+    @Override
+    public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {}
+
+    @Override
+    public void onTrackLimitationNotice(int i) {}
+
+    @Override
+    public void onScrubGeo(long l, long l1) {}
+
+    @Override
+    public void onStallWarning(StallWarning stallWarning) {}
+
+    @Override
+    public void onException(Exception e) {}
 }

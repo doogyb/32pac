@@ -1,3 +1,4 @@
 .idea/
 credentials.txt
 out/
+src/twitter4j.properties
