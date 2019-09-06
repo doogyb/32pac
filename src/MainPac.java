@@ -4,6 +4,7 @@ import TwitterInteraction.TwitterActions;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import util.IO;
 
 /**
  * Created by doogy on 17/04/15.
@@ -13,24 +14,8 @@ public class MainPac {
     private static final String dbURL = "http://ohhla.com/favorite.html";
 
     //Download new lyrics.
-    private static boolean updateLyrics() {
-        System.out.println("Do you wish to update your lyrics database ? (y/n) ");
-        while (true) {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-                String input = br.readLine();
-                if (input.equals("y") || input.equals("yes")) {
-                    br.close();
-                    return true;
-                } else if (input.equals("n") || input.equals("no")) {
-                    br.close();
-                    return false;
-                } else System.out.println("[-] Incorrect input, please enter y/n");
-            } catch (IOException e) {
-                System.out.println("[-] Incorrect input.");
-                return false;
-            }
-        }
+    private static boolean updateLyrics() throws IOException {
+        return IO.YesNo("Do you wish to update the lyric database?");
     }
 
     public static void main(String[] args) throws IOException {
@@ -40,7 +25,5 @@ public class MainPac {
             db.downloadSongs();
         }
         TwitterActions TA = new TwitterActions();
-        TA.authorization();
-        TA.trendTweetListener();
     }
 }
